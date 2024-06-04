@@ -1,0 +1,187 @@
+import java.util.Random;
+import java.awt.Rectangle;
+import java.lang.Math;
+
+@SuppressWarnings("serial") //supppressing the yellow line for a serial ID
+abstract class GameEntities extends Rectangle{
+
+	private int WINB=600, WINH=600;
+	
+	public int x, y, spd, size; //spd will be normalized via the rotation equation
+	private Random randNum = new Random();
+    
+    //Inheritence :O
+	
+	//P.S. ANY CODE UNDER A MULTILINE COMMENT IS CODE TO WORRY ABOUT LATER
+   
+	class Player extends GameEntities {
+		public int fasterSpd, jetFuel;
+		public int hp, iFrames; //iFrames are in ms
+		
+		Player() {
+			this.x=300-this.size/2;
+			this.y=500-this.size/2;
+			this.spd=2;
+			this.fasterSpd=5;
+			this.jetFuel=500;
+			this.hp = 3;
+			this.iFrames=1000; //The intention is firerate of enemies divide and player iframes multiply by 1.5 on medium, 2x on easy.
+			this.size=8;
+		}
+		
+		Player(int x, int y) {
+			this.x=x-this.size/2;
+			this.y=y-this.size/2;
+			this.spd=2;
+			this.fasterSpd=5;
+			this.jetFuel=500;
+			this.hp = 3;
+			this.iFrames=1000;
+			this.size=8;
+		}
+	}
+	
+	abstract class Enemy extends GameEntities {
+		public int hp, iFrames;
+		public int firerate;
+		
+		//Average line-moving joe
+		class Liner extends Enemy {
+			Liner() {
+				this.hp=1;
+				this.iFrames=25;
+				this.size=12;
+				this.firerate=1000;
+				this.x=0;
+				this.y=0;
+				this.spd = 3;
+			}
+			
+			Liner(int x, int y) {
+				this.hp=1;
+				this.iFrames=25;
+				this.size=12;
+				this.firerate=1000;
+				this.x=x;
+				this.y=y;
+				this.spd = 3;
+			}
+		}
+		
+		//Can take more damage
+		class Tanker extends Enemy {
+			Tanker() {
+				this.hp=4;
+				this.iFrames=75;
+				this.size=20;
+				this.firerate=1000;
+				this.x=0;
+				this.y=0;
+				this.spd = 3;
+			}
+			
+			Tanker(int x, int y) {
+				this.hp=4;
+				this.iFrames=75;
+				this.size=20;
+				this.firerate=1000;
+				this.x=x;
+				this.y=y;
+				this.spd = 4;
+			}
+		}
+		/*
+		//Rotates around a point that may move
+		class Rotater extends Enemy {
+
+		}
+		
+		//shoots really fast, essentially limiting the arena
+		class Beamer extends Enemy {
+
+		}
+		
+		//Explodes on death and a bit tougher
+		class Demolitioner extends Enemy {
+
+			void specialAbility() {
+				//explodes on death
+			}
+		}
+		
+		*/
+	}
+	
+	abstract class Boss extends GameEntities {
+		public int hp, iFrames;
+		public int firerate; //If we get time, replace firerate for methods that do custom attacks
+		
+		class Boss1 extends Boss {
+			Boss1() {
+				this.hp=123;
+				this.iFrames=25;
+				this.size=50;
+				this.firerate=1000;
+				this.x=0;
+				this.y=0;
+				this.spd = 3;
+			}
+		}
+	}
+	
+	abstract class Projectile extends GameEntities {
+		int rotation = -90; //The degree angle which projectiles travel (may be changed to radians)
+		int findRotation(int x1, int y1, int x2, int y2) {
+			int rotation = 0;
+			rotation = (int) Math.toDegrees(Math.atan2(y2-y1, x2-x1));
+			return rotation; 
+		}
+		
+		class player_lineProjectile extends Projectile {
+			player_lineProjectile(int x, int y) {
+				this.x=x+this.size/2;
+				this.y=y+this.size/2;
+				this.spd=5;
+				this.size=4;
+			}
+		}
+		
+		class enemy_lineProjectile extends Projectile {
+			enemy_lineProjectile() {
+				this.x=x+this.size/2;
+				this.y=y+this.size/2;
+				this.spd=5;
+				this.size=4;
+			}
+			
+			enemy_lineProjectile(int size) {
+				this.x=x+this.size/2;
+				this.y=y+this.size/2;
+				this.spd=5;
+				this.size=size;
+			}
+			
+			enemy_lineProjectile(int size, int set_rotation) {
+				this.x=x+this.size/2;
+				this.y=y+this.size/2;
+				this.spd=5;
+				this.size=size;
+			}
+		}
+		
+		/*class enemy_homingProjectile extends Projectile { //essentially a homing missile.
+			
+		}*/
+	}
+	
+	class Background extends GameEntities {
+		public int size;
+		
+		Background() {
+			this.x=randNum.nextInt(0,WINB-this.size+1);
+			this.y=0;
+			this.size=randNum.nextInt(1,5+1);
+			this.spd=randNum.nextInt(1,4+1);
+		}
+	}
+}
