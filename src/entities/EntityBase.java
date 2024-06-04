@@ -28,6 +28,10 @@ public abstract class EntityBase extends Rectangle {
     	
     }
     
+    public void draw() {
+    	
+    }
+    
     
     
     
