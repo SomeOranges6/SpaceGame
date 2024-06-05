@@ -11,7 +11,7 @@ import hsa2.GraphicsConsole;
 
 public class SpaceGame {
 	
-	GraphicsConsole gc = new GraphicsConsole(800,600, "Warp Lane");
+	GraphicsConsole gc = new GraphicsConsole(600,600, "Warp Lane");
 	Random rand = new Random();
 	ArrayList<EntityBase> entities = new ArrayList<>();
 	boolean paused;
