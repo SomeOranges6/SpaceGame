@@ -3,8 +3,13 @@ package entities;
 import java.awt.Rectangle;
 import java.util.Random;
 
+import hsa2.GraphicsConsole;
+import main.SpaceGame;
+
 @SuppressWarnings("serial")
 public abstract class EntityBase extends Rectangle {
+	
+	GraphicsConsole gc;
 	
 	public int x,y;
 	
@@ -16,12 +21,17 @@ public abstract class EntityBase extends Rectangle {
     
     public int width,height;
     
-    public EntityBase(int x, int y, int width, int height) {
+    public int rotation;
+    
+    public int maxSpeed;
+    
+    public EntityBase(int x, int y, int width, int height, GraphicsConsole gc) {
 		super(x,y,width,height);
+		this.gc = gc;
 	}
     
     public void onDead() {
-    	
+    	SpaceGame.entities.remove(this);
     }
     
     public void update() {
@@ -29,6 +39,10 @@ public abstract class EntityBase extends Rectangle {
     }
     
     public void draw() {
+    	
+    }
+    
+    public void onCollision(EntityBase e) {
     	
     }
     

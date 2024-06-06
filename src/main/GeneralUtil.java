@@ -27,5 +27,7 @@ public class GeneralUtil {
 		   poly.addPoint(x, y - 3 * r * direction);
 		   return poly; 
 	   }
+	   
+	   public static rect
 	
 }
