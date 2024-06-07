@@ -17,6 +17,7 @@ class Player_lineProjectile extends Projectile {
 		this.y=y+this.size/2;
 		this.spd=8;
 		this.size=4;
+		this.rotation=-90;
 	}
 }
 	
@@ -25,17 +26,17 @@ class Enemy_lineProjectile extends Projectile {
 	Enemy_lineProjectile(int x, int y) {
 		this.x=x+this.size/2;
 		this.y=y+this.size/2;
-		this.spd=5;
+		this.spd=10;
 		this.size=4;
-		this.rotation=-90;
+		this.rotation=90;
 	}
-		
+	
 	Enemy_lineProjectile(int x, int y, int size) {
 		this.x=x+this.size/2;
 		this.y=y+this.size/2;
-		this.spd=5;
+		this.spd=10;
 		this.size=size;
-		this.rotation=-90;
+		this.rotation=90;
 	}
 		
 	Enemy_lineProjectile(int x, int y, double set_rotation) {
