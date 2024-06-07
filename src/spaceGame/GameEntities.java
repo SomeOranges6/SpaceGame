@@ -14,8 +14,6 @@ abstract class GameEntities extends Rectangle{
     //Inheritence :O
 	
 	//P.S. ANY CODE UNDER A MULTILINE COMMENT IS CODE TO WORRY ABOUT LATER
-   
-	
 }
 
 
