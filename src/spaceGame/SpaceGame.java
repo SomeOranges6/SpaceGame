@@ -14,6 +14,7 @@ import java.awt.event.KeyEvent;
 import hsa2.GraphicsConsole;
 
 public class SpaceGame implements ActionListener {
+	//Initializing many, many, variables.
 	Font normalFont = new Font("Tahoma", Font.PLAIN, 32);
 	Font gameOverFont = new Font("Tahoma", Font.BOLD, 64);
 	public int WINB=600, WINH=600;
@@ -58,6 +59,9 @@ public class SpaceGame implements ActionListener {
 		}
 	}
 	
+	/*
+	 * The method that draws the gameplay initially
+	*/
 	void setup_game() {
 		game.setVisible(false);
 		gameOver.setVisible(false);
@@ -67,6 +71,9 @@ public class SpaceGame implements ActionListener {
 		game.setFont(normalFont);
 	}
 	
+	/*
+	 * This method is the whole function of what getting a game over does
+	*/
 	void func_gameOver() {
 		game.dispose();
 		startScreen.dispose();
@@ -82,6 +89,9 @@ public class SpaceGame implements ActionListener {
 		new SpaceGame();
 	}
 	
+	/*
+	 * This method is the whole function of the starting menu
+	*/
 	void func_startScreen() {
 		Rectangle easyButton = new Rectangle(100,400,400,100);
 		boolean mouseTrigger = false;
@@ -114,6 +124,9 @@ public class SpaceGame implements ActionListener {
 		}
 	}
 	
+	/*
+	 * This method will update positions and run checks
+	*/
 	void updScreen() {
 		playerFunctions.move();
 		playerFunctions.move_Projectiles();
@@ -128,6 +141,9 @@ public class SpaceGame implements ActionListener {
 		
 	}
 	
+	/*
+	 * This method will draw the game
+	*/
 	void drawGraphics() {
 		synchronized(game) {
 			
@@ -177,6 +193,9 @@ public class SpaceGame implements ActionListener {
 		}
 	}
 	
+	/*
+	 * This method moves the stars that spawn
+	*/
 	void moveStars() {
 		for(int b=0; b<stars.size(); b++) {
 			stars.get(b).y += stars.get(b).spd;
@@ -184,12 +203,20 @@ public class SpaceGame implements ActionListener {
 		}
 	}
 
+	/*
+	 * Timer method where Timers are utilized
+	*/
 	@Override
 	public void actionPerformed(ActionEvent ev){ //Timer should be used for wave progression?
+		//player shoots based on a timer
 		if(ev.getSource() == playerShoots) playerFunctions.shoot(player.x+playerstats.size/2, player.y);
+		
+		//infinite enemies spawn based on a timer
 		if(ev.getSource() == enemySpawn) {
 				enemyCache.add(new Liner(randNum.nextInt(0,WINB-16), 0));
 		}
+		
+		//keeps track of when enemies should fire. It is coded so they all don't fire at the same time
 		if(ev.getSource() == enemyShoots) {
 			enemyShotAccumulator += ms_sleep;
 			for(Enemy e: enemyCache) {
@@ -201,12 +228,17 @@ public class SpaceGame implements ActionListener {
 				}
 			}
 		}
+		
+		//spawn and move stars in the background
 		if(ev.getSource() == starSpawn) {
 			stars.add(new Background());
 			moveStars();
 		}
 	}
 	
+	/*
+	 * An array of methods that contain the actions for the easy difficulty waves
+	*/
 	Waves[] easyWaves = {
 		new Waves() {public void wave() { //Wave 1
 			//these print statements are jokes. Put what each wave does here, delay spawns with Thread.sleep(int ms);
@@ -227,8 +259,15 @@ public class SpaceGame implements ActionListener {
 		
 	};
 	
+	/*
+	 * Interface that contains methods for player movement
+	*/
 	GameFunctions playerFunctions = new GameFunctions() {
+		/*
+		 * Moves the player and runs player position checks and jet fuel check
+		*/
 		public void move() {
+			//normalize player movement
 			int normalization = 0;
 			if(game.isKeyDown(KeyEvent.VK_W) || game.isKeyDown(KeyEvent.VK_UP)) {
 				normalization = -90;
@@ -254,6 +293,8 @@ public class SpaceGame implements ActionListener {
 			if((game.isKeyDown(KeyEvent.VK_S) || game.isKeyDown(KeyEvent.VK_DOWN)) && (game.isKeyDown(KeyEvent.VK_D) || game.isKeyDown(KeyEvent.VK_RIGHT))) {
 				normalization = 45;
 			}
+			
+			//Move the player
 			if(game.isKeyDown(KeyEvent.VK_S) || game.isKeyDown(KeyEvent.VK_A) || game.isKeyDown(KeyEvent.VK_D) || game.isKeyDown(KeyEvent.VK_W) || (game.isKeyDown(KeyEvent.VK_DOWN) || game.isKeyDown(KeyEvent.VK_LEFT) || game.isKeyDown(KeyEvent.VK_RIGHT) || game.isKeyDown(KeyEvent.VK_UP))) {
 				if(game.isKeyDown(KeyEvent.VK_SPACE) && canUseJets) {
 					playerstats.jetFuel -= playerstats.fuelDrain;
@@ -265,6 +306,8 @@ public class SpaceGame implements ActionListener {
 					player.y = (int) ((playerstats.spd)*Math.sin(Math.toRadians(normalization)) + (0)*Math.cos(Math.toRadians(normalization)) + player.y);
 				}
 			}
+			
+			//Run jet fuel and position checks
 			if(playerstats.jetFuel<=playerstats.fuelDrain-1) canUseJets = false;
 			if(playerstats.jetFuel>=200) canUseJets = true;
 			if(playerstats.jetFuel>500) playerstats.jetFuel = 500;
@@ -274,6 +317,10 @@ public class SpaceGame implements ActionListener {
 			if(player.y>limit.x+limit.width-playerstats.size) player.y=WINH-playerstats.size;
 			if(player.x>limit.y+limit.height-playerstats.size) player.x=WINB-playerstats.size;
 		}
+		
+		/*
+		 * Fires projectiles from the player based on weapon
+		*/
 		public void shoot(int x, int y) {
 			Player_lineProjectile projRect = new Player_lineProjectile(0,0);
 			projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y));
@@ -285,6 +332,10 @@ public class SpaceGame implements ActionListener {
 				}
 			}
 		}
+		
+		/*
+		 * Delete projectiles based on their positions
+		*/
 		public void delete_Projectiles() {
 			for(int i=0; i<projectileCache.size(); i++) {
 				if(projectileCache.get(i) instanceof Player_lineProjectile && projectileCache.get(i).y<0) {
@@ -293,6 +344,9 @@ public class SpaceGame implements ActionListener {
 			}
 		}
 		
+		/*
+		 * Check if the player collides with an enemy bullet, deleting enemy bullet and changing player's stats
+		*/
 		public void checkCollision() {
 			playerstats.active_iFrames -= ms_sleep;
 			if(playerstats.active_iFrames<=0) {
@@ -309,6 +363,10 @@ public class SpaceGame implements ActionListener {
 				}
 			}
 		}
+		
+		/*
+		 * Checks if the player is dead
+		*/
 		public void checkDeath() {
 			if(playerstats.hp<=0) {
 				func_gameOver();
@@ -316,13 +374,14 @@ public class SpaceGame implements ActionListener {
 		}
 	};
 	
+	/*
+	 * Interface for enemy methods
+	*/
 	GameFunctions enemyFunctions = new GameFunctions() {
-		@SuppressWarnings("unused")
-		public void spawnLiner(int x, int y) {
-			enemyCache.add(new Liner(x, y));
-			enemyCache.get(enemyCache.size()-1).fireBuffer = enemyShotAccumulator%enemyCache.get(enemyCache.size()-1).firerate;
-		}
-
+		
+		/*
+		 * Moves all enemies
+		*/
 		public void move() {
 			for(Enemy i: enemyCache) {
 				if(i instanceof Liner) i.y += i.spd;
@@ -332,6 +391,9 @@ public class SpaceGame implements ActionListener {
 			}
 		}
 
+		/*
+		 * Moves all enemy projectiles
+		*/
 		public void move_Projectiles() {
 			try {
 				for(Projectile i: projectileCache) {
@@ -343,17 +405,26 @@ public class SpaceGame implements ActionListener {
 			} catch(ConcurrentModificationException oops) {}
 		}
 
+		/*
+		 * Deletes enemy projectiles based on position
+		*/
 		public void delete_Projectiles() {
 			for(int i=0; i<projectileCache.size(); i++) {
 				if(projectileCache.get(i).x < 0 || projectileCache.get(i).x>WINB || projectileCache.get(i).y<0 || projectileCache.get(i).y > WINH) projectileCache.remove(i);
 			}
 		}
 
+		/*
+		 * Fires shots from enemy
+		*/
 		public void shoot(int x, int y) {
 			projectileCache.add(new Enemy_lineProjectile(x, y));
 			projectileCache.get(projectileCache.size()-1).rotation = projectileCache.get(projectileCache.size()-1).findRotation(projectileCache.get(projectileCache.size()-1).x, projectileCache.get(projectileCache.size()-1).y, player.x, player.y);
 		}
 
+		/*
+		 * Check if enemies are hit by a bullet
+		*/
 		public void checkCollision() {
 			for(int enemy=0; enemy<enemyCache.size(); enemy++) {
 				Rectangle e = new Rectangle(enemyCache.get(enemy).x, enemyCache.get(enemy).y, enemyCache.get(enemy).size, enemyCache.get(enemy).size);
@@ -371,7 +442,10 @@ public class SpaceGame implements ActionListener {
 				}
 			}
 		}
-
+		
+		/*
+		 * Checks if the enemy is dead
+		*/
 		public void checkDeath() {
 			for(int e = 0; e<enemyCache.size(); e++) {
 				if(enemyCache.get(e).hp <= 0) enemyCache.remove(e);
