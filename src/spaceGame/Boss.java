@@ -12,7 +12,7 @@ class Boss1 extends Boss {
 	Boss1() {
 		this.bossTitle="Gargantuar";
 		this.hp=123;
-		this.iFrames=25;
+		this.iFrames=0;
 		this.size=50;
 		this.firerate=1000;
 		this.x=0;
