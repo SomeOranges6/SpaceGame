@@ -3,7 +3,7 @@ package spaceGame;
 @SuppressWarnings("serial")
 abstract class Enemy extends GameEntities {
 	public int hp, iFrames;
-	public int firerate;
+	public int firerate, fireBuffer, untilFire;
 }
 
 @SuppressWarnings("serial")
@@ -14,9 +14,11 @@ class Liner extends Enemy {
 		this.iFrames=25;
 		this.size=12;
 		this.firerate=1000;
+		this.fireBuffer=0;
+		this.untilFire=0;
 		this.x=WINB/2;
 		this.y=0;
-		this.spd = 3;
+		this.spd = 1;
 	}
 	
 	Liner(int x, int y) {
@@ -24,10 +26,13 @@ class Liner extends Enemy {
 		this.iFrames=25;
 		this.size=12;
 		this.firerate=1000;
+		this.fireBuffer=0;
+		this.untilFire=0;
 		this.x=x;
 		this.y=y;
-		this.spd = 3;
+		this.spd = 1;
 	}
+
 }
 
 //Can take more damage
@@ -38,9 +43,11 @@ class Tanker extends Enemy {
 		this.iFrames=75;
 		this.size=20;
 		this.firerate=1000;
+		this.fireBuffer=0;
+		this.untilFire=0;
 		this.x=WINB/2;
 		this.y=0;
-		this.spd = 3;
+		this.spd = 2;
 	}
 	
 	Tanker(int x, int y) {
@@ -48,10 +55,13 @@ class Tanker extends Enemy {
 		this.iFrames=75;
 		this.size=20;
 		this.firerate=1000;
+		this.fireBuffer=0;
+		this.untilFire=0;
 		this.x=x;
 		this.y=y;
-		this.spd = 4;
+		this.spd = 2;
 	}
+	
 }
 /*
 //Rotates around a point that may move
