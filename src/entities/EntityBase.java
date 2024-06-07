@@ -25,21 +25,37 @@ public abstract class EntityBase extends Rectangle {
     
     public int maxSpeed;
     
+    public boolean bounce;
+    
     public EntityBase(int x, int y, int width, int height, GraphicsConsole gc) {
 		super(x,y,width,height);
 		this.gc = gc;
 	}
     
     public void onDead() {
-    	SpaceGame.entities.remove(this);
+    	SpaceGame.deleteEntity(this);
     }
     
     public void update() {
-    	
+    	move();
     }
     
     public void draw() {
     	
+    }
+    
+    public void move() {
+    	
+	   if(x + vX >= gc.getWidth() - width || x + vX <= width) {
+	 	   vX *= bounce ? -1 : 0;
+	   }
+	    
+	   if(y + vY >= gc.getHeight() - height || y + vY <= height) {
+	 	   vY *= bounce ? -1 : 0;
+	   }
+ 	  
+ 	   x += vX;
+ 	   y += vY;
     }
     
     public void onCollision(EntityBase e) {

@@ -8,6 +8,7 @@ import java.util.Random;
 import entities.EntityBase;
 import entities.IEnemy;
 import entities.Player;
+import entities.ProjectileBase;
 import hsa2.GraphicsConsole;
 
 public class SpaceGame {
@@ -21,10 +22,11 @@ public class SpaceGame {
 	Random rand = new Random();
 	
 	public static ArrayList<EntityBase> entities = new ArrayList<>();
+	public static ArrayList<ProjectileBase> projectiles = new ArrayList<>();
 	
 	boolean paused;
 	
-	Player player;
+	static Player player;
 	
 	public static void main(String[] args) {
 		new SpaceGame();
@@ -63,6 +65,8 @@ public class SpaceGame {
 		   
 		   player = new Player(0,0,10,10, gcGame);
 		   entities.add(player);
+		   
+		   startMenu();
 	}
 	
 	private void startMenu() {
@@ -105,8 +109,23 @@ public class SpaceGame {
 	
 	public void collisionCheck() {
 		for(EntityBase entity : entities) {
-			if(entity.cont)
+			for(ProjectileBase projectile : projectiles) {
+				if(entity.contains(projectile)) {
+					projectile.onCollision(entity);
+				}
+			}
 		}
 	}
 	
+	public static Player getPlayer() {
+		return player;
+	}
+	
+	public static void spawnEntity(EntityBase e) {
+		entities.add(e);
+	}
+	
+	public static void deleteEntity(EntityBase e) {
+		entities.remove(e);
+	}
 }

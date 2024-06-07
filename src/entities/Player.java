@@ -25,8 +25,10 @@ public class Player extends EntityBase {
     	
     }
     
+	@Override
     public void update() {
-    	
+    	makeAttack();
+    	super.update();
     }
     
     public void draw() {
@@ -39,8 +41,13 @@ public class Player extends EntityBase {
     	}
     		
     }
+    @Override
+    public void move() {
+    	handleInput();
+    	super.move();
+    }
     
-    public void normalize() {
+    public void handleInput() {
     	int normalization = 0;
 		if(gc.isKeyDown(KeyEvent.VK_W) || gc.isKeyDown(KeyEvent.VK_UP)) {
 			normalization = -90;
@@ -67,8 +74,8 @@ public class Player extends EntityBase {
 			normalization = 45;
 		}
 		if(gc.isKeyDown(KeyEvent.VK_S) || gc.isKeyDown(KeyEvent.VK_A) || gc.isKeyDown(KeyEvent.VK_D) || gc.isKeyDown(KeyEvent.VK_W) || (gc.isKeyDown(KeyEvent.VK_DOWN) || gc.isKeyDown(KeyEvent.VK_LEFT) || gc.isKeyDown(KeyEvent.VK_RIGHT) || gc.isKeyDown(KeyEvent.VK_UP))) {
-			x = (int) ((maxSpeed)*Math.cos(Math.toRadians(normalization)) - (0)*Math.sin(Math.toRadians(normalization)) + x);
-			y = (int) ((maxSpeed)*Math.sin(Math.toRadians(normalization)) + (0)*Math.cos(Math.toRadians(normalization)) + y);
+			vX = (int) ((maxSpeed)*Math.cos(Math.toRadians(normalization)) - (0)*Math.sin(Math.toRadians(normalization)));
+			vY = (int) ((maxSpeed)*Math.sin(Math.toRadians(normalization)) + (0)*Math.cos(Math.toRadians(normalization)));
 		}
     }
     

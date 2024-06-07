@@ -1,6 +1,9 @@
 package main;
 
 import java.awt.Polygon;
+import java.awt.Rectangle;
+
+import hsa2.GraphicsConsole;
 
 public class GeneralUtil {
 	
@@ -28,6 +31,8 @@ public class GeneralUtil {
 		   return poly; 
 	   }
 	   
-	   public static rect
+	   public static void rectFromRectangle(Rectangle rect, GraphicsConsole gc) {
+		   gc.drawRect(rect.x, rect.y, rect.width, rect.height);
+	   }
 	
 }

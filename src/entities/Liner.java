@@ -1,10 +1,12 @@
 package entities;
 
+import hsa2.GraphicsConsole;
+
 @SuppressWarnings("serial")
 public class Liner extends EntityBase implements IEnemy {
 
-	public Liner(int x, int y, int width, int height) {
-		super(x, y, width, height);
+	public Liner(int x, int y, int width, int height, GraphicsConsole gc) {
+		super(x, y, width, height, gc);
 		// TODO Auto-generated constructor stub
 	}
 
