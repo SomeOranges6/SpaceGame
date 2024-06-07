@@ -8,5 +8,7 @@ interface GameFunctions {
 	void move();
 	void move_Projectiles();
 	void delete_Projectiles();
-	void shoot();
+	void shoot(int x, int y);
+	void checkCollision();
+	void checkDeath();
 }
