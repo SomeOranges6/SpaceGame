@@ -103,31 +103,31 @@ public class SpaceGame {
 		}
 		
 	}
-	boolean initial;
+	boolean initial = true;
 	
 	public void drawBackground() {
-		if(initial || System.currentTimeMillis() % 50 == 0) {
-			for(int i = 0; i < starPos.length ; i++) {
-				
-				starPos[i][0] = rand.nextInt(10, 590);
-				starPos[i][1] = rand.nextInt(10, 590);
-				
+		if(initial) {
+			for(int i = 0; i < 300 ; i++) {
+				stars.add( new Integer[]{rand.nextInt(10, 590),rand.nextInt(10, 590)});
 		    }
 			initial = false;
 		}
 		
-		for(int[] coord : starPos) {
+		for(Integer[] coord : stars) {
 			int c = rand.nextInt(56, 256);
 			int b = 246;
-			gcGame.setColor(new Color(c, c, b, 60));
+			gcGame.setColor(new Color(c, c, b, 20));
 			gcGame.fillPolygon(GeneralUtil.fourPointStar(coord[0],coord[1], 2));
 		
 			coord[1]--;
-			
-			gcGame.setColor(new Color(c - 10, c - 10, b - 10));
+			gcGame.setColor(new Color(c - 10, c - 10, b - 10, 60));
 			gcGame.fillPolygon(GeneralUtil.fourPointStar(coord[0], coord[1], 1));
-			
 		}
+		
+		stars.add(new Integer[]{rand.nextInt(10, 590),gcGame.getHeight() - 30});
+		if(stars.get(0)[1] > 600)
+			stars.remove(0);
+		
    }
 	
 	
