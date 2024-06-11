@@ -255,6 +255,9 @@ public class SpaceGame implements ActionListener {
 	 * This method will update positions and run checks
 	*/
 	void updScreen() {
+		deletePower();
+		movePowerup();
+		checkpUPColl();
 		playerFunctions.move();
 		playerFunctions.move_Projectiles();
 		playerFunctions.delete_Projectiles();
@@ -265,9 +268,6 @@ public class SpaceGame implements ActionListener {
 		enemyFunctions.delete_Projectiles();
 		enemyFunctions.checkCollision();
 		enemyFunctions.checkDeath();
-		deletePower();
-		movePowerup();
-		checkpUPColl();
 	}
 	
 	/*
