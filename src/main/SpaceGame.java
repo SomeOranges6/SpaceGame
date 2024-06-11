@@ -13,18 +13,24 @@ import hsa2.GraphicsConsole;
 
 public class SpaceGame {
 	
-	public GraphicsConsole gcGame = new GraphicsConsole(600,600, "Warp Lane");
+	public final GraphicsConsole gcGame = new GraphicsConsole(600,600, "Warp Lane");
 	//GraphicsConsole gcPaused = new GraphicsConsole(600,600, "Warp Lane");
-	GraphicsConsole gcMenu = new GraphicsConsole(600,600, "Warp Lane");
+	public final GraphicsConsole gcMenu = new GraphicsConsole(600,600, "Warp Lane");
 	
 	public static final int sleep = 20;
 	
 	Random rand = new Random();
-	
-	public  ArrayList<EntityBase> entities = new ArrayList<>();
-	public  ArrayList<ProjectileBase> projectiles = new ArrayList<>();
+
+
+	private final ArrayList<EntityBase> entities = new ArrayList<>();
+	private final  ArrayList<ProjectileBase> projectiles = new ArrayList<>();
+	//Caches entities to be spawned in the next tick
+	public  ArrayList<EntityBase> entitiesToSpawn = new ArrayList<>();
+	public  ArrayList<EntityBase> entitiesToRemove = new ArrayList<>();
 	
 	boolean paused;
+
+	public int ticks;
 	
 	static Player player;
 	public int[][] starPos = new int [500][2];
@@ -44,29 +50,41 @@ public class SpaceGame {
 	
 	public void gameplayLoop() {
 			boolean backgroundDrawn = false;
+			gcGame.sleep(sleep);
+			ticks++;
+			if(ticks >= 1028){
+				ticks = 1;
+			}
+			for(EntityBase toSpawn : entitiesToSpawn){
+				addEntityToList(toSpawn);
+			}
+			for(EntityBase toRemove : entitiesToRemove){
+				deleteEntityFromList(toRemove);
+			}
+			entitiesToSpawn.clear();
+			entitiesToRemove.clear();
+
 			for(EntityBase entity : entities) {
-					gcGame.sleep(sleep);
-					entity.update();
-					
-					if(entity instanceof IEnemy)
-						((IEnemy) entity).attack();
-					
-					synchronized(gcGame) {
+				entity.update();
+
+				if(entity instanceof IEnemy)
+					((IEnemy) entity).attack();
+
+				synchronized(gcGame) {
+					if(!backgroundDrawn) {
 						gcGame.clear();
-						if(!backgroundDrawn) {
-							drawBackground();
-							backgroundDrawn = true;
-						}
-						entity.draw();
+						drawBackground();
+						backgroundDrawn = true;
 					}
-				
+					entity.draw();
+				}
+
 			}
 			
 	}
 	
 	private void setup() {
-		   
-		
+
 		   gcGame.setVisible(false);
 		   gcGame.setBackgroundColor(Color.BLACK);
 		   gcGame.setAntiAlias(true);
@@ -105,8 +123,8 @@ public class SpaceGame {
 		}
 		
 	}
+
 	boolean initial = true;
-	
 	public void drawBackground() {
 		if(initial) {
 			for(int i = 0; i < 300 ; i++) {
@@ -132,7 +150,6 @@ public class SpaceGame {
 		
    }
 	
-	
 	public void collisionCheck() {
 		for(EntityBase entity : entities) {
 			for(ProjectileBase projectile : projectiles) {
@@ -147,11 +164,24 @@ public class SpaceGame {
 		return player;
 	}
 	
+	
 	public void spawnEntity(EntityBase e) {
-		entities.add(e);
+		entitiesToSpawn.add(e);
 	}
 	
-	public void deleteEntity(EntityBase e) {
+	public void removeEntity(EntityBase e) {
+		entitiesToRemove.add(e);
+	}
+
+	private void addEntityToList(EntityBase e) {
+		entities.add(e);
+		if(e instanceof ProjectileBase)
+			projectiles.add((ProjectileBase) e);
+	}
+
+	private void deleteEntityFromList(EntityBase e) {
 		entities.remove(e);
+		if(e instanceof ProjectileBase)
+			projectiles.remove((ProjectileBase) e);
 	}
 }
