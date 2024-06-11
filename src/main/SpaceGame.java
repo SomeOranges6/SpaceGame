@@ -52,11 +52,11 @@ public class SpaceGame {
 						((IEnemy) entity).attack();
 					
 					synchronized(gcGame) {
+						gcGame.clear();
 						if(!backgroundDrawn) {
 							drawBackground();
 							backgroundDrawn = true;
 						}
-						gcGame.clear();
 						entity.draw();
 					}
 				
