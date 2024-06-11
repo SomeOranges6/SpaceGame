@@ -4,7 +4,7 @@ package spaceGame;
 class Player extends GameEntities {
 	int firerate = 500; //in ms
 	public int fasterSpd, jetFuel, fuelDrain;
-	public int hp, iFrames, active_iFrames; //iFrames are in ms
+	public int hp, maxhp, iFrames, active_iFrames; //iFrames are in ms
 	public int rotation=0; //in degrees, rotation is used to normalize movement. it constantly changes.
 	
 	Player() {
@@ -16,6 +16,7 @@ class Player extends GameEntities {
 		this.fuelDrain = 5;
 		this.firerate = 500;
 		this.hp = 3;
+		this.maxhp = 3;
 		this.iFrames=750; //The intention is firerate of enemies divide and player iframes multiply by 1.5 on medium, 2x on easy.
 		this.active_iFrames=0;
 		this.size=20;
@@ -31,6 +32,7 @@ class Player extends GameEntities {
 		this.fuelDrain = 1;
 		this.firerate = 500;
 		this.hp = 3;
+		this.maxhp = 3;
 		this.iFrames=750;
 		this.active_iFrames=0;
 		this.size=20;
