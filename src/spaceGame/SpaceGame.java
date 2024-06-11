@@ -138,7 +138,10 @@ public class SpaceGame implements ActionListener {
 	}
 	
 	SpaceGame() {
-		loadSoundtrackAndImages();	
+		if(loaded == false) {
+			loadSoundtrackAndImages();
+			loaded = true;
+		}	
 		setup_game();
 		func_startScreen();
 		while(true) {
