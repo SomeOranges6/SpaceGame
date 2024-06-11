@@ -1,13 +1,13 @@
 package entities;
 
+import java.awt.Color;
 import java.awt.event.KeyEvent;
 
 import hsa2.GraphicsConsole;
+import main.GeneralUtil;
 
 @SuppressWarnings("serial")
 public class Player extends EntityBase {
-	
-	GraphicsConsole gc;
 	
 	int boostedSpeed, fuel;
 	
@@ -15,7 +15,7 @@ public class Player extends EntityBase {
 	
 	public boolean boostCooldown;
 	
-	public int firerate;
+	public int firerate = 5;
 	
 	public Player(int x, int y, int width, int height, GraphicsConsole gc) {
 		super(x, y, width, height, gc);
@@ -32,7 +32,8 @@ public class Player extends EntityBase {
     }
     
     public void draw() {
-    	
+    	gc.setColor(new Color(255,255,0));
+    	GeneralUtil.rectFromRectangle(this, gc);
     }
     
     public void makeAttack() {

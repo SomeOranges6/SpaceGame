@@ -25,7 +25,7 @@ public abstract class EntityBase extends Rectangle {
     
     public int maxSpeed;
     
-    public boolean bounce;
+    public boolean bounce = true;
     
     public EntityBase(int x, int y, int width, int height, GraphicsConsole gc) {
 		super(x,y,width,height);

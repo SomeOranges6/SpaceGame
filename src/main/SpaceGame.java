@@ -14,10 +14,10 @@ import hsa2.GraphicsConsole;
 public class SpaceGame {
 	
 	GraphicsConsole gcGame = new GraphicsConsole(600,600, "Warp Lane");
-	GraphicsConsole gcPaused = new GraphicsConsole(600,600, "Warp Lane");
+	//GraphicsConsole gcPaused = new GraphicsConsole(600,600, "Warp Lane");
 	GraphicsConsole gcMenu = new GraphicsConsole(600,600, "Warp Lane");
 	
-	public static final int sleep = 10;
+	public static final int sleep = 20;
 	
 	Random rand = new Random();
 	
@@ -28,43 +28,55 @@ public class SpaceGame {
 	
 	static Player player;
 	
+	public int[][] starPos = new int [500][2];
+	
+	public ArrayList<Integer[]> stars = new ArrayList<>();
+	
 	public static void main(String[] args) {
 		new SpaceGame();
 	}
 	
 	SpaceGame(){
 		setup();
-		while(!paused)
+		while(gcGame.isVisible())
 			gameplayLoop();
 		
 	}
 	
 	public void gameplayLoop() {
-		if(gcGame.isVisible()) {
-			
+		
 			for(EntityBase entity : entities) {
-				entity.update();
+					gcGame.sleep(sleep);
+					entity.update();
+					
+					if(entity instanceof IEnemy)
+						((IEnemy) entity).attack();
+					
+					synchronized(gcGame) {
+						gcGame.clear();
+						entity.draw();
+						drawBackground();
+					}
 				
-				if(entity instanceof IEnemy)
-					((IEnemy) entity).attack();
-				
-				synchronized(gcGame) {
-					entity.draw();
-					drawBackground();
-				}
 			}
 			
-		}
+		
 	}
 	
 	private void setup() {
+		   
+		
+		   gcGame.setVisible(false);
 		   gcGame.setBackgroundColor(Color.BLACK);
 		   gcGame.setAntiAlias(true);
 		   gcGame.setLocationRelativeTo(null);
 		   gcGame.clear();
 		   
-		   player = new Player(0,0,10,10, gcGame);
-		   entities.add(player);
+		   gcMenu.setVisible(true);
+		   gcMenu.setBackgroundColor(Color.BLACK);
+		   gcMenu.setAntiAlias(true);
+		   gcMenu.setLocationRelativeTo(null);
+		   gcMenu.clear();
 		   
 		   startMenu();
 	}
@@ -72,12 +84,10 @@ public class SpaceGame {
 	private void startMenu() {
 		Rectangle startButton = new Rectangle(100,400,400,100);
 		
-		gcMenu.setVisible(true);
 		gcMenu.enableMouse();
 		gcMenu.enableMouseMotion();
-		gcMenu.setBackground(Color.BLACK);
 		
-		gcMenu.setColor(new Color(255, 255, 255));
+		gcMenu.setColor(new Color(0, 255, 0));
 		gcMenu.fillRect(startButton.x, startButton.y, startButton.width, startButton.height);
 		while(true) {
 			gcMenu.sleep(sleep);
@@ -85,27 +95,41 @@ public class SpaceGame {
 			if(gcMenu.getMouseClick() > 0 && startButton.contains(gcMenu.getMouseX(), gcMenu.getMouseY())) {
 				gcGame.setVisible(true);
 				gcMenu.setVisible(false);
+				player = new Player(0,0,10,10, gcGame);
+				entities.add(player);
+				break;   
 			}
 			
 		}
 		
 	}
+	boolean initial;
 	
 	public void drawBackground() {
-		for(int x = 10; x <= 790; x++) {
-			for(int y = 10; y <= 590; y++) {
-				if(rand.nextInt(2000) == 0) {
-					int c = rand.nextInt(56, 256);
-					int b = 246;
-					gcGame.setColor(new Color(c, c, b, 60));
-					gcGame.fillPolygon(GeneralUtil.fourPointStar(x,y, 2));
-					
-					gcGame.setColor(new Color(c - 10, c - 10, b - 10));
-					gcGame.fillPolygon(GeneralUtil.fourPointStar(x, y, 1));
-				}
-			}
-	   }
-	}
+		if(initial || System.currentTimeMillis() % 50 == 0) {
+			for(int i = 0; i < starPos.length ; i++) {
+				
+				starPos[i][0] = rand.nextInt(10, 590);
+				starPos[i][1] = rand.nextInt(10, 590);
+				
+		    }
+			initial = false;
+		}
+		
+		for(int[] coord : starPos) {
+			int c = rand.nextInt(56, 256);
+			int b = 246;
+			gcGame.setColor(new Color(c, c, b, 60));
+			gcGame.fillPolygon(GeneralUtil.fourPointStar(coord[0],coord[1], 2));
+		
+			coord[1]--;
+			
+			gcGame.setColor(new Color(c - 10, c - 10, b - 10));
+			gcGame.fillPolygon(GeneralUtil.fourPointStar(coord[0], coord[1], 1));
+			
+		}
+   }
+	
 	
 	public void collisionCheck() {
 		for(EntityBase entity : entities) {

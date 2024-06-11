@@ -32,7 +32,7 @@ public class GeneralUtil {
 	   }
 	   
 	   public static void rectFromRectangle(Rectangle rect, GraphicsConsole gc) {
-		   gc.drawRect(rect.x, rect.y, rect.width, rect.height);
+		   gc.fillRect(rect.x, rect.y, rect.width, rect.height);
 	   }
 	
 }
