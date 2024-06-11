@@ -12,10 +12,9 @@ public class ProjectileBase extends EntityBase {
 	/** Solely used for enemies**/
 	public boolean aiming;
 	
-	public ProjectileBase(int x, int y, int width, int height, GraphicsConsole gc) {
-		super(x, y, width, height, gc);
+	public ProjectileBase(int x, int y, int width, int height, SpaceGame game) {
+		super(x, y, width, height, game);
 	}
-	
 	public static int getDamage() {
 		return 1;
 	}
@@ -51,7 +50,7 @@ public class ProjectileBase extends EntityBase {
 		GeneralUtil.rectFromRectangle(this, gc);
 	}
 	
-	public ProjectileBase playerProjectile = new ProjectileBase(x, y, width, height, gc){
+	public ProjectileBase playerProjectile = new ProjectileBase(x, y, width, height, theGame){
 
 		public static int getDamage() {
 			return 1;

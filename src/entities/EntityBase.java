@@ -11,7 +11,7 @@ public abstract class EntityBase extends Rectangle {
 	
 	GraphicsConsole gc;
 	
-	public int x,y;
+	SpaceGame theGame;
 	
 	static Random rand = new Random();
 	
@@ -27,13 +27,14 @@ public abstract class EntityBase extends Rectangle {
     
     public boolean bounce = true;
     
-    public EntityBase(int x, int y, int width, int height, GraphicsConsole gc) {
+    public EntityBase(int x, int y, int width, int height, SpaceGame game) {
 		super(x,y,width,height);
-		this.gc = gc;
+		this.gc = game.gcGame;
+		theGame = game;
 	}
     
     public void onDead() {
-    	SpaceGame.deleteEntity(this);
+    	theGame.deleteEntity(this);
     }
     
     public void update() {
@@ -47,11 +48,11 @@ public abstract class EntityBase extends Rectangle {
     public void move() {
     	
 	   if(x + vX >= gc.getWidth() - width || x + vX <= width) {
-	 	   vX *= bounce ? -1 : 0;
+	 	   vX *= bounce ? -1 : 1;
 	   }
 	    
 	   if(y + vY >= gc.getHeight() - height || y + vY <= height) {
-	 	   vY *= bounce ? -1 : 0;
+	 	   vY *= bounce ? -1 : 1;
 	   }
  	  
  	   x += vX;

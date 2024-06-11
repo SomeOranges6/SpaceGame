@@ -13,7 +13,7 @@ import hsa2.GraphicsConsole;
 
 public class SpaceGame {
 	
-	GraphicsConsole gcGame = new GraphicsConsole(600,600, "Warp Lane");
+	public GraphicsConsole gcGame = new GraphicsConsole(600,600, "Warp Lane");
 	//GraphicsConsole gcPaused = new GraphicsConsole(600,600, "Warp Lane");
 	GraphicsConsole gcMenu = new GraphicsConsole(600,600, "Warp Lane");
 	
@@ -21,13 +21,12 @@ public class SpaceGame {
 	
 	Random rand = new Random();
 	
-	public static ArrayList<EntityBase> entities = new ArrayList<>();
-	public static ArrayList<ProjectileBase> projectiles = new ArrayList<>();
+	public  ArrayList<EntityBase> entities = new ArrayList<>();
+	public  ArrayList<ProjectileBase> projectiles = new ArrayList<>();
 	
 	boolean paused;
 	
 	static Player player;
-	
 	public int[][] starPos = new int [500][2];
 	
 	public ArrayList<Integer[]> stars = new ArrayList<>();
@@ -44,7 +43,7 @@ public class SpaceGame {
 	}
 	
 	public void gameplayLoop() {
-		
+			boolean backgroundDrawn = false;
 			for(EntityBase entity : entities) {
 					gcGame.sleep(sleep);
 					entity.update();
@@ -53,14 +52,16 @@ public class SpaceGame {
 						((IEnemy) entity).attack();
 					
 					synchronized(gcGame) {
+						if(!backgroundDrawn) {
+							drawBackground();
+							backgroundDrawn = true;
+						}
 						gcGame.clear();
 						entity.draw();
-						drawBackground();
 					}
 				
 			}
 			
-		
 	}
 	
 	private void setup() {
@@ -70,6 +71,7 @@ public class SpaceGame {
 		   gcGame.setBackgroundColor(Color.BLACK);
 		   gcGame.setAntiAlias(true);
 		   gcGame.setLocationRelativeTo(null);
+		   gcGame.enableMouse();
 		   gcGame.clear();
 		   
 		   gcMenu.setVisible(true);
@@ -95,7 +97,7 @@ public class SpaceGame {
 			if(gcMenu.getMouseClick() > 0 && startButton.contains(gcMenu.getMouseX(), gcMenu.getMouseY())) {
 				gcGame.setVisible(true);
 				gcMenu.setVisible(false);
-				player = new Player(0,0,10,10, gcGame);
+				player = new Player(300,300,10,10, this);
 				entities.add(player);
 				break;   
 			}
@@ -145,11 +147,11 @@ public class SpaceGame {
 		return player;
 	}
 	
-	public static void spawnEntity(EntityBase e) {
+	public void spawnEntity(EntityBase e) {
 		entities.add(e);
 	}
 	
-	public static void deleteEntity(EntityBase e) {
+	public void deleteEntity(EntityBase e) {
 		entities.remove(e);
 	}
 }

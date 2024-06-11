@@ -5,6 +5,7 @@ import java.awt.event.KeyEvent;
 
 import hsa2.GraphicsConsole;
 import main.GeneralUtil;
+import main.SpaceGame;
 
 @SuppressWarnings("serial")
 public class Player extends EntityBase {
@@ -17,8 +18,9 @@ public class Player extends EntityBase {
 	
 	public int firerate = 5;
 	
-	public Player(int x, int y, int width, int height, GraphicsConsole gc) {
-		super(x, y, width, height, gc);
+	public Player(int x, int y, int width, int height, SpaceGame game) {
+		super(x, y, width, height, game);
+		maxSpeed = 1;
 	}
 	
 	public void onDead() {
@@ -75,8 +77,8 @@ public class Player extends EntityBase {
 			normalization = 45;
 		}
 		if(gc.isKeyDown(KeyEvent.VK_S) || gc.isKeyDown(KeyEvent.VK_A) || gc.isKeyDown(KeyEvent.VK_D) || gc.isKeyDown(KeyEvent.VK_W) || (gc.isKeyDown(KeyEvent.VK_DOWN) || gc.isKeyDown(KeyEvent.VK_LEFT) || gc.isKeyDown(KeyEvent.VK_RIGHT) || gc.isKeyDown(KeyEvent.VK_UP))) {
-			vX = (int) ((maxSpeed)*Math.cos(Math.toRadians(normalization)) - (0)*Math.sin(Math.toRadians(normalization)));
-			vY = (int) ((maxSpeed)*Math.sin(Math.toRadians(normalization)) + (0)*Math.cos(Math.toRadians(normalization)));
+			vX = (int) ((maxSpeed)*Math.cos(Math.toRadians(normalization)) - Math.sin(Math.toRadians(normalization)));
+			vY = (int) ((maxSpeed)*Math.sin(Math.toRadians(normalization)) + Math.cos(Math.toRadians(normalization)));
 		}
     }
     
