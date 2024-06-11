@@ -12,7 +12,7 @@ class Liner extends Enemy {
 	Liner() {
 		this.hp=1;
 		this.iFrames=25;
-		this.size=12;
+		this.size=16;
 		this.firerate=1000;
 		this.fireBuffer=0;
 		this.untilFire=0;
@@ -24,7 +24,7 @@ class Liner extends Enemy {
 	Liner(int x, int y) {
 		this.hp=1;
 		this.iFrames=25;
-		this.size=12;
+		this.size=16;
 		this.firerate=1000;
 		this.fireBuffer=0;
 		this.untilFire=0;
