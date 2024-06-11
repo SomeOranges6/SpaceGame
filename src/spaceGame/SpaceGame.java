@@ -6,6 +6,18 @@ import java.util.Random;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+
+import java.io.File;
+import java.io.IOException;
+
 import javax.swing.Timer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,13 +27,14 @@ import hsa2.GraphicsConsole;
 
 public class SpaceGame implements ActionListener {
 	//Initializing many, many, variables.
-	Font normalFont = new Font("Tahoma", Font.PLAIN, 32);
-	Font gameOverFont = new Font("Tahoma", Font.BOLD, 64);
+	Font normalFont = new Font("Tahoma", Font.PLAIN, 16);
+	Font bigFont = new Font("Tahoma", Font.BOLD, 64);
 	public int WINB=600, WINH=600;
 	public int ms_sleep = 1000/60; //it's 60fps... but not.
 	Random randNum = new Random();
 	
-	public int currentWave = 0;
+	public int currentWave = 0, difficulty = 0, kills=0;
+	//P.S. I tried to get a timeSurvived variable going. It was never accurate.
 	public boolean canUseJets = true;
 	public int enemyCD = 1663, starCD = 50;
 	
@@ -44,11 +57,88 @@ public class SpaceGame implements ActionListener {
 	public Timer starSpawn = new Timer(starCD, this);
 	public Timer easyTimer = new Timer(10000, this); //for rounds lasting too long maybe
 	
+	boolean loaded = false;
+	Clip heavensHellSentGift = null;
+	Clip pestOfTheCosmos = null;
+	Clip interstellarStomper = null;
+	BufferedImage spaceship = null;
+	BufferedImage damagedSpaceship = null;
+	BufferedImage redEnemy = null;
+	BufferedImage blueEnemy = null;
+	BufferedImage greenEnemy = null;
+	BufferedImage yellowEnemy = null;
+	void loadSoundtrackAndImages() {
+		try {
+			AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File("Terraria Calamity Mod Music - Heaven's Hell-Sent Gift - Theme of The Astral Meteor.wav"));
+			heavensHellSentGift = AudioSystem.getClip();
+			heavensHellSentGift.open(inputStream);
+		} catch (UnsupportedAudioFileException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (LineUnavailableException e) {
+			e.printStackTrace();
+		}
+		try {
+			AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File("Terraria Calamity Mod Music - Pest of The Cosmos - Theme of Astrum Deus.wav"));
+			pestOfTheCosmos = AudioSystem.getClip();
+			pestOfTheCosmos.open(inputStream);
+		} catch (UnsupportedAudioFileException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (LineUnavailableException e) {
+			e.printStackTrace();
+		}
+		try {
+			AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File("Terraria Calamity Mod Music - Interstellar Stomper  Theme of Astrum Aureus.wav"));
+			interstellarStomper = AudioSystem.getClip();
+			interstellarStomper.open(inputStream);
+		} catch (UnsupportedAudioFileException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (LineUnavailableException e) {
+			e.printStackTrace();
+		}
+		try {
+			spaceship = ImageIO.read(new File("spaceship.png").getAbsoluteFile());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			damagedSpaceship = ImageIO.read(new File("damaged spaceship.png").getAbsoluteFile());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			redEnemy = ImageIO.read(new File("red enemy.png").getAbsoluteFile());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			blueEnemy = ImageIO.read(new File("blue enemy.png").getAbsoluteFile());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			greenEnemy = ImageIO.read(new File("green enemy.png").getAbsoluteFile());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			yellowEnemy = ImageIO.read(new File("yellow enemy.png").getAbsoluteFile());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void main(String[] args) {
 		new SpaceGame();
 	}
 	
 	SpaceGame() {
+		loadSoundtrackAndImages();	
 		setup_game();
 		func_startScreen();
 		while(true) {
@@ -73,18 +163,30 @@ public class SpaceGame implements ActionListener {
 	
 	/*
 	 * This method is the whole function of what getting a game over does
+	 * It shows a game over screen then creates a new instance of SpaceGame()
 	*/
 	void func_gameOver() {
 		game.dispose();
 		startScreen.dispose();
-		gameOver.setFont(gameOverFont);
+		heavensHellSentGift.stop(); heavensHellSentGift.setMicrosecondPosition(0);
+		pestOfTheCosmos.stop(); pestOfTheCosmos.setMicrosecondPosition(0);
+		interstellarStomper.stop();	pestOfTheCosmos.setMicrosecondPosition(0);
+		playerShoots.restart(); playerShoots.stop(); 
+		enemySpawn.restart(); enemySpawn.stop(); 
+		enemyShoots.restart(); enemyShoots.stop(); 
+		easyTimer.restart(); easyTimer.stop(); 
+		gameOver.setFont(bigFont);
 		gameOver.setLocationRelativeTo(null);
 		gameOver.setBackgroundColor(new Color(0,0,0));
 		gameOver.clear();
+		createSound("Touhou Death Sound.wav");
 		gameOver.setColor(new Color(255,255,255));
 		gameOver.setVisible(true);
 		gameOver.drawString("GAME OVER", WINB/6, WINH/2);
+		gameOver.setFont(normalFont);
+		gameOver.drawString(String.format("KILLS: %d", kills), WINB/6, WINH/2+75);
 		gameOver.sleep(3000);
+		kills = 0;
 		gameOver.dispose();
 		new SpaceGame();
 	}
@@ -96,27 +198,46 @@ public class SpaceGame implements ActionListener {
 		Rectangle easyButton = new Rectangle(100,400,400,100);
 		boolean mouseTrigger = false;
 		
+		//setup start screen
 		startScreen.setVisible(true);
 		startScreen.enableMouse();
 		startScreen.enableMouseMotion();
+		startScreen.setFont(bigFont);
 		startScreen.setBackgroundColor(new Color(15,10,15));
 		startScreen.setLocationRelativeTo(null);
 		startScreen.clear();
 		startScreen.setColor(new Color(255, 255, 255));
 		startScreen.fillRect(easyButton.x, easyButton.y, easyButton.width, easyButton.height);
+		startScreen.drawString("SPACE GAME", WINB/6, WINH/6);
+		startScreen.setColor(new Color(0,255,0));
+		startScreen.drawRect(easyButton.x, easyButton.y, easyButton.width, easyButton.height);
+		startScreen.drawString("EASY", easyButton.x+120, easyButton.y+75);
+		startScreen.setColor(new Color(255, 255, 255));
+		startScreen.setFont(normalFont);
+		startScreen.drawString("Shoot as many aliens as possible!", WINB/6, WINH/2-90);
+		startScreen.drawString("Dodge enemy bullets. Don't let your HP drop to 0!", WINB/6, WINH/2-60);
+		startScreen.drawString("WASD or Arrow Keys to move,", WINB/6, WINH/2);
+		startScreen.drawString("Hold SPACE to speed up with jets!", WINB/6, WINH/2+30);
+		
+		//start screen loop begins
 		while(true) {
 			startScreen.sleep(ms_sleep);
+			//If easy mode button is pressed, it executes a few things
 			if(easyButton.contains(startScreen.getMouseX(), startScreen.getMouseY()) && startScreen.getMouseClick() > 0 && mouseTrigger == false) {
 				game.setVisible(true);
 				startScreen.setVisible(false);
 				playerstats.hp *= 3;
+				playerstats.maxhp *= 3;
 				playerstats.iFrames *= 2;
+				//playerstats.hp = 1;
 				enemyCD *= 1.5;
 				playerShoots.start();
 				enemySpawn.start();
 				enemyShoots.start();
 				starSpawn.start();
 				easyTimer.start();
+				difficulty = 1;
+				heavensHellSentGift.loop(Clip.LOOP_CONTINUOUSLY);
 				break;
 			}
 			if(startScreen.getMouseClick() > 0) mouseTrigger = true;
@@ -138,7 +259,6 @@ public class SpaceGame implements ActionListener {
 		enemyFunctions.delete_Projectiles();
 		enemyFunctions.checkCollision();
 		enemyFunctions.checkDeath();
-		
 	}
 	
 	/*
@@ -149,6 +269,9 @@ public class SpaceGame implements ActionListener {
 			
 			game.setBackgroundColor(new Color(15,10,15));
 			game.clear();
+			//draw movement limit
+			game.setColor(new Color(15,60,15,203));
+			game.drawRect(0, 200, WINB, 400); 
 			
 			//drawing stars
 			try {
@@ -159,11 +282,16 @@ public class SpaceGame implements ActionListener {
 			} catch(ConcurrentModificationException oops) {}
 			
 			//drawing player
-			game.setColor(new Color(15,60,15,204));
-			game.drawRect(0, 200, WINB, 400);
-			if(playerstats.active_iFrames>0) game.setColor(new Color(255,255,255, 123));
-			else game.setColor(new Color(255,255,255));
-			game.fillRect(player.x, player.y, playerstats.size, playerstats.size);
+			if(playerstats.active_iFrames>0) {
+				game.setColor(new Color(102,255,102, 51));
+				game.drawImage(damagedSpaceship, player.x-playerstats.size/2, player.y-playerstats.size/2, playerstats.size*2, playerstats.size*2);
+			}
+			else {
+				game.setColor(new Color(102,255,102, 102));
+				game.drawImage(spaceship, player.x-playerstats.size/2, player.y-playerstats.size/2, playerstats.size*2, playerstats.size*2);
+			}
+			game.fillOval(player.x, player.y, playerstats.size, playerstats.size);
+			
 			
 			//drawing projectiles
 			try {
@@ -178,17 +306,19 @@ public class SpaceGame implements ActionListener {
 			game.setColor(new Color(255,0,0));
 			try {
 				for(Enemy e: enemyCache) {
-					game.fillRect(e.x, e.y, e.size, e.size);
+					game.drawImage(redEnemy, e.x, e.y, e.size, e.size);
 				}
 			} catch(ConcurrentModificationException oops) {}
 			
-			//drawing text
+			//drawing text and bars
 			if(playerstats.hp > 3)game.setColor(new Color(102,255,204, 134));
 			else game.setColor(new Color(255,51,102, 134));
-			game.drawString(String.format("HP: %d", playerstats.hp), WINB-130, WINH-68);
+			game.drawString(String.format("HP: %d", playerstats.hp), 50, 547);
+			game.fillRect(50, 550, 500/450*500-((playerstats.maxhp-playerstats.hp)*500/450*500/playerstats.maxhp), 10);
 			if(canUseJets) game.setColor(new Color(102,255,204, 134));
 			else game.setColor(new Color(255,51,102, 134));
-			game.drawString(String.format("JET: %d", playerstats.jetFuel), WINB-140, WINH-34);
+			game.drawString(String.format("JET: %d", playerstats.jetFuel), 50, 577);
+			game.fillRect(50, 580, playerstats.jetFuel, 10);
 			
 		}
 	}
@@ -209,7 +339,9 @@ public class SpaceGame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent ev){ //Timer should be used for wave progression?
 		//player shoots based on a timer
-		if(ev.getSource() == playerShoots) playerFunctions.shoot(player.x+playerstats.size/2, player.y);
+		if(ev.getSource() == playerShoots) {
+			playerFunctions.shoot(player.x+playerstats.size/2, player.y);
+		}
 		
 		//infinite enemies spawn based on a timer
 		if(ev.getSource() == enemySpawn) {
@@ -219,14 +351,16 @@ public class SpaceGame implements ActionListener {
 		//keeps track of when enemies should fire. It is coded so they all don't fire at the same time
 		if(ev.getSource() == enemyShoots) {
 			enemyShotAccumulator += ms_sleep;
-			for(Enemy e: enemyCache) {
-				e.untilFire += ms_sleep;
-				if(e.untilFire>e.firerate) e.untilFire=0;
-				int bufferCheck = e.untilFire % e.firerate;
-				if(bufferCheck == e.fireBuffer) {
-					enemyFunctions.shoot(e.x+e.size/2, e.y+e.size/2);
+			try {
+				for(Enemy e: enemyCache) {
+					e.untilFire += ms_sleep;
+					if(e.untilFire>e.firerate) e.untilFire=0;
+					int bufferCheck = e.untilFire % e.firerate;
+					if(bufferCheck == e.fireBuffer) {
+						enemyFunctions.shoot(e.x+e.size/2, e.y+e.size/2);
+					}
 				}
-			}
+			} catch(ConcurrentModificationException oops) {}
 		}
 		
 		//spawn and move stars in the background
@@ -298,12 +432,12 @@ public class SpaceGame implements ActionListener {
 			if(game.isKeyDown(KeyEvent.VK_S) || game.isKeyDown(KeyEvent.VK_A) || game.isKeyDown(KeyEvent.VK_D) || game.isKeyDown(KeyEvent.VK_W) || (game.isKeyDown(KeyEvent.VK_DOWN) || game.isKeyDown(KeyEvent.VK_LEFT) || game.isKeyDown(KeyEvent.VK_RIGHT) || game.isKeyDown(KeyEvent.VK_UP))) {
 				if(game.isKeyDown(KeyEvent.VK_SPACE) && canUseJets) {
 					playerstats.jetFuel -= playerstats.fuelDrain;
-					player.x = (int) ((playerstats.fasterSpd)*Math.cos(Math.toRadians(normalization)) - (0)*Math.sin(Math.toRadians(normalization)) + player.x);
-					player.y = (int) ((playerstats.fasterSpd)*Math.sin(Math.toRadians(normalization)) + (0)*Math.cos(Math.toRadians(normalization)) + player.y);
+					player.x = (int) ((playerstats.fasterSpd)*Math.cos(Math.toRadians(normalization))+ player.x);
+					player.y = (int) ((playerstats.fasterSpd)*Math.sin(Math.toRadians(normalization))+ player.y);
 				}
 				else {
-					player.x = (int) ((playerstats.spd)*Math.cos(Math.toRadians(normalization)) - (0)*Math.sin(Math.toRadians(normalization)) + player.x);
-					player.y = (int) ((playerstats.spd)*Math.sin(Math.toRadians(normalization)) + (0)*Math.cos(Math.toRadians(normalization)) + player.y);
+					player.x = (int) ((playerstats.spd)*Math.cos(Math.toRadians(normalization))+ player.x);
+					player.y = (int) ((playerstats.spd)*Math.sin(Math.toRadians(normalization))+ player.y);
 				}
 			}
 			
@@ -324,7 +458,12 @@ public class SpaceGame implements ActionListener {
 		public void shoot(int x, int y) {
 			Player_lineProjectile projRect = new Player_lineProjectile(0,0);
 			projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y));
+			createSound("player laser shoot.wav");
 		}
+		
+		/*
+		 * Moves all player projectiles
+		*/
 		public void move_Projectiles() {
 			for(Projectile i: projectileCache) {
 				if(i instanceof Player_lineProjectile) {
@@ -356,6 +495,7 @@ public class SpaceGame implements ActionListener {
 						if(player.contains(projRect.x, projRect.y) || player.contains(projRect.x+projRect.width, projRect.y) || player.contains(projRect.x, projRect.y+projRect.height) || player.contains(projRect.x+projRect.width, projRect.y+projRect.height)) {
 							projectileCache.remove(p);
 							playerstats.hp -= 1;
+							if(playerstats.hp > 1) createSound("damaged sound effect.wav");
 							playerstats.active_iFrames = playerstats.iFrames;
 							player.y += 5; 
 						}	
@@ -398,8 +538,8 @@ public class SpaceGame implements ActionListener {
 			try {
 				for(Projectile i: projectileCache) {
 					if(i instanceof Enemy_lineProjectile) {
-						i.x = (int) ((i.spd)*Math.cos(Math.toRadians(i.rotation)) - (0)*Math.sin(Math.toRadians(i.rotation)) + i.x);
-						i.y = (int) ((i.spd)*Math.sin(Math.toRadians(i.rotation)) + (0)*Math.cos(Math.toRadians(i.rotation)) + i.y);
+						i.x = (int) ((i.spd)*Math.cos(Math.toRadians(i.rotation))+ i.x);
+						i.y = (int) ((i.spd)*Math.sin(Math.toRadians(i.rotation))+ i.y);
 					}
 				}
 			} catch(ConcurrentModificationException oops) {}
@@ -448,9 +588,30 @@ public class SpaceGame implements ActionListener {
 		*/
 		public void checkDeath() {
 			for(int e = 0; e<enemyCache.size(); e++) {
-				if(enemyCache.get(e).hp <= 0) enemyCache.remove(e);
+				if(enemyCache.get(e).hp <= 0) {
+					enemyCache.remove(e);
+					createSound("kill noise.wav");
+					kills++;
+				}
 			}
 		}
 		
 	};
+	
+	void createSound(String audioFileName) {
+		Clip playerShootNoise = null;
+			try {
+				AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File(audioFileName));
+				playerShootNoise = AudioSystem.getClip();
+				playerShootNoise.open(inputStream);
+				playerShootNoise.start();
+			} catch (UnsupportedAudioFileException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (LineUnavailableException e) {
+				e.printStackTrace();
+			}
+
+	}
 }
