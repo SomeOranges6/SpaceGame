@@ -19,6 +19,14 @@ class Player_lineProjectile extends Projectile {
 		this.size=4;
 		this.rotation=-90;
 	}
+	
+	Player_lineProjectile(int x, int y, double rotation) {
+		this.x=x+this.size/2;
+		this.y=y+this.size/2;
+		this.spd=8;
+		this.size=4;
+		this.rotation=rotation*-1;
+	}
 }
 	
 @SuppressWarnings("serial")
