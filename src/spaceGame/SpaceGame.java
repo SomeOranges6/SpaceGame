@@ -36,7 +36,8 @@ public class SpaceGame implements ActionListener {
 	public int currentWave = 0, difficulty = 0, kills=0;
 	//P.S. I tried to get a timeSurvived variable going. It was never accurate.
 	public boolean canUseJets = true;
-	public int enemyCD = 1663, starCD = 50;
+	public int enemyCD = 2003, starCD = 50;
+	public int weaponState = 0;
 	
 	public ArrayList<Projectile> projectileCache = new ArrayList<Projectile>();
 	public ArrayList<Enemy> enemyCache = new ArrayList<Enemy>();
@@ -45,6 +46,8 @@ public class SpaceGame implements ActionListener {
 	public Player playerstats = new Player();
 	public Rectangle player = new Rectangle(playerstats.x, playerstats.y, playerstats.size, playerstats.size);
 	public Rectangle limit = new Rectangle(0,200, WINB,400);
+	public Rectangle powerup = new Rectangle();
+	public ArrayList<Powerups> powerCache = new ArrayList<Powerups>();
 	
 	public GraphicsConsole game = new GraphicsConsole(WINB,WINH);
 	public GraphicsConsole startScreen = new GraphicsConsole(WINB, WINH);
@@ -262,6 +265,9 @@ public class SpaceGame implements ActionListener {
 		enemyFunctions.delete_Projectiles();
 		enemyFunctions.checkCollision();
 		enemyFunctions.checkDeath();
+		deletePower();
+		movePowerup();
+		checkpUPColl();
 	}
 	
 	/*
@@ -309,9 +315,21 @@ public class SpaceGame implements ActionListener {
 			game.setColor(new Color(255,0,0));
 			try {
 				for(Enemy e: enemyCache) {
-					game.drawImage(redEnemy, e.x, e.y, e.size, e.size);
+					if(e instanceof Liner || e instanceof Rotater) game.drawImage(redEnemy, e.x, e.y, e.size, e.size);
+					else if (e instanceof Tanker) game.drawImage(blueEnemy, e.x, e.y, e.size, e.size);
 				}
 			} catch(ConcurrentModificationException oops) {}
+			
+			//draw powerups
+			try {
+				for (Powerups p: powerCache) {
+					if(p.diameter == 5) game.setColor(new Color(200, 200, 100));
+					else if(p.diameter == 7) game.setColor(new Color(102,255,204));
+					else game.setColor(new Color(20, 200, 20));
+					game.fillOval(p.x,p.y,p.diameter,p.diameter);
+				}
+			} catch(ConcurrentModificationException oops) {}
+			
 			
 			//drawing text and bars
 			if(playerstats.hp > 3)game.setColor(new Color(102,255,204, 134));
@@ -321,6 +339,7 @@ public class SpaceGame implements ActionListener {
 			if(canUseJets) game.setColor(new Color(102,255,204, 134));
 			else game.setColor(new Color(255,51,102, 134));
 			game.drawString(String.format("JET: %d", playerstats.jetFuel), 50, 577);
+			//game.drawString(String.format("WEAPON: %d", weaponState), WINB-135, 547); (I don't like it lol)
 			game.fillRect(50, 580, playerstats.jetFuel, 10);
 			
 		}
@@ -343,12 +362,24 @@ public class SpaceGame implements ActionListener {
 	public void actionPerformed(ActionEvent ev){ //Timer should be used for wave progression?
 		//player shoots based on a timer
 		if(ev.getSource() == playerShoots) {
-			playerFunctions.shoot(player.x+playerstats.size/2, player.y);
+			playerFunctions.shoot(player.x+playerstats.size/2, player.y+playerstats.size/2);
 		}
 		
 		//infinite enemies spawn based on a timer
 		if(ev.getSource() == enemySpawn) {
-				enemyCache.add(new Liner(randNum.nextInt(0,WINB-16), 0));
+				int chance = randNum.nextInt(1,7+1);
+				if(chance==7) enemyCache.add(new Tanker(randNum.nextInt(0,WINB-20), 0));
+				else if(chance>5) {
+					int randomPointX = randNum.nextInt(50,WINB-68);
+					enemyCache.add(new Rotater(randomPointX, -50, 50, 0));
+					enemyCache.add(new Rotater(randomPointX, -50, 50, 90));
+					enemyCache.add(new Rotater(randomPointX, -50, 50, 180));
+					enemyCache.add(new Rotater(randomPointX, -50, 50, 270));
+				}
+				else {
+					enemyCache.add(new Liner(randNum.nextInt(0,WINB-16), 0));
+					if (chance<3)enemyCache.get(enemyCache.size()-1).rotation = 90;
+				}
 		}
 		
 		//keeps track of when enemies should fire. It is coded so they all don't fire at the same time
@@ -356,11 +387,13 @@ public class SpaceGame implements ActionListener {
 			enemyShotAccumulator += ms_sleep;
 			try {
 				for(Enemy e: enemyCache) {
-					e.untilFire += ms_sleep;
-					if(e.untilFire>e.firerate) e.untilFire=0;
-					int bufferCheck = e.untilFire % e.firerate;
-					if(bufferCheck == e.fireBuffer) {
-						enemyFunctions.shoot(e.x+e.size/2, e.y+e.size/2);
+					if(e instanceof Liner || e instanceof Rotater) {
+						e.untilFire += ms_sleep;
+						if(e.untilFire>e.firerate) e.untilFire=0;
+						int bufferCheck = e.untilFire % e.firerate;
+						if(bufferCheck == e.fireBuffer) {
+							enemyFunctions.shoot(e.x+e.size/2, e.y+e.size/2);
+						}
 					}
 				}
 			} catch(ConcurrentModificationException oops) {}
@@ -372,6 +405,57 @@ public class SpaceGame implements ActionListener {
 			moveStars();
 		}
 	}
+	
+	shootType[] playerWeapons = {
+		new shootType() { public void shoot(int x, int y) {
+				playerstats.firerate = 500;
+				playerShoots.stop();
+				playerShoots.setInitialDelay(playerstats.firerate);
+				playerShoots.restart();
+				Player_lineProjectile projRect = new Player_lineProjectile(0,0);
+				projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y));
+				createSound("player laser shoot.wav");
+			}
+		},
+		new shootType() { public void shoot(int x, int y) {
+				playerstats.firerate = 450;
+				playerShoots.stop();
+				playerShoots.setInitialDelay(playerstats.firerate);
+				playerShoots.restart();
+				Player_lineProjectile projRect = new Player_lineProjectile(0,0);
+				projectileCache.add(new Player_lineProjectile(x-projRect.size/2-playerstats.size/2, y));
+				projectileCache.add(new Player_lineProjectile(x-projRect.size/2+playerstats.size/2, y));
+				createSound("player laser shoot.wav");
+				createSound("player laser shoot.wav");
+			}
+		},
+		new shootType() { public void shoot(int x, int y) {
+				playerstats.firerate = 1050;
+				playerShoots.stop();
+				playerShoots.setInitialDelay(playerstats.firerate);
+				playerShoots.restart();
+				Player_lineProjectile projRect = new Player_lineProjectile(0,0);
+				projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 45));
+				projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 67));
+				projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 90));
+				projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 113));
+				projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 135));
+				createSound("player laser shoot.wav");
+				createSound("player laser shoot.wav");
+				createSound("player laser shoot.wav");
+			}
+		},
+		new shootType() { public void shoot(int x, int y) {
+				playerstats.firerate = 220;
+				playerShoots.stop();
+				playerShoots.setInitialDelay(playerstats.firerate);
+				playerShoots.restart();
+				Player_lineProjectile projRect = new Player_lineProjectile(0,0);
+				projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y));
+				createSound("player laser shoot.wav");
+			}
+		},
+	};
 	
 	/*
 	 * An array of methods that contain the actions for the easy difficulty waves
@@ -459,9 +543,7 @@ public class SpaceGame implements ActionListener {
 		 * Fires projectiles from the player based on weapon
 		*/
 		public void shoot(int x, int y) {
-			Player_lineProjectile projRect = new Player_lineProjectile(0,0);
-			projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y));
-			createSound("player laser shoot.wav");
+			playerWeapons[weaponState].shoot(x, y);
 		}
 		
 		/*
@@ -470,7 +552,8 @@ public class SpaceGame implements ActionListener {
 		public void move_Projectiles() {
 			for(Projectile i: projectileCache) {
 				if(i instanceof Player_lineProjectile) {
-					i.y -= i.spd;
+					i.x = (int) ((i.spd)*Math.cos(Math.toRadians(i.rotation))+ i.x);
+					i.y = (int) ((i.spd)*Math.sin(Math.toRadians(i.rotation))+ i.y);
 				}
 			}
 		}
@@ -490,6 +573,7 @@ public class SpaceGame implements ActionListener {
 		 * Check if the player collides with an enemy bullet, deleting enemy bullet and changing player's stats
 		*/
 		public void checkCollision() {
+			if(playerstats.hp > playerstats.maxhp) playerstats.hp = playerstats.maxhp; 
 			playerstats.active_iFrames -= ms_sleep;
 			if(playerstats.active_iFrames<=0) {
 				for(int p=0; p<projectileCache.size(); p++) {
@@ -497,6 +581,17 @@ public class SpaceGame implements ActionListener {
 						Rectangle projRect = new Rectangle(projectileCache.get(p).x, projectileCache.get(p).y, projectileCache.get(p).size, projectileCache.get(p).size);
 						if(player.contains(projRect.x, projRect.y) || player.contains(projRect.x+projRect.width, projRect.y) || player.contains(projRect.x, projRect.y+projRect.height) || player.contains(projRect.x+projRect.width, projRect.y+projRect.height)) {
 							projectileCache.remove(p);
+							playerstats.hp -= 1;
+							if(playerstats.hp > 1) createSound("damaged sound effect.wav");
+							playerstats.active_iFrames = playerstats.iFrames;
+							player.y += 5; 
+						}	
+					}
+				}
+				for(int e=0; e<enemyCache.size(); e++) {
+					if(enemyCache.get(e) instanceof Tanker) {
+						Rectangle projRect = new Rectangle(enemyCache.get(e).x, enemyCache.get(e).y, enemyCache.get(e).size, enemyCache.get(e).size);
+						if(player.contains(projRect.x, projRect.y) || player.contains(projRect.x+projRect.width, projRect.y) || player.contains(projRect.x, projRect.y+projRect.height) || player.contains(projRect.x+projRect.width, projRect.y+projRect.height)) {
 							playerstats.hp -= 1;
 							if(playerstats.hp > 1) createSound("damaged sound effect.wav");
 							playerstats.active_iFrames = playerstats.iFrames;
@@ -527,7 +622,25 @@ public class SpaceGame implements ActionListener {
 		*/
 		public void move() {
 			for(Enemy i: enemyCache) {
-				if(i instanceof Liner) i.y += i.spd;
+				if(i instanceof Liner) {
+					i.x = (int) ((i.spd)*Math.cos(Math.toRadians(i.rotation))+ i.x);
+					i.y = (int) ((i.spd)*Math.sin(Math.toRadians(i.rotation))+ i.y);
+					if(i.x>=WINB-i.size || i.x<=0) {
+						if(i.rotation > 90) i.rotation=45;
+						else i.rotation=135;
+					}
+				}
+				if(i instanceof Tanker) {
+					i.rotation = i.findRotation(i.x, i.y, player.x, player.y);
+					i.x = (int) ((i.spd)*Math.cos(Math.toRadians(i.rotation))+ i.x);
+					i.y = (int) ((i.spd)*Math.sin(Math.toRadians(i.rotation))+ i.y);
+				}
+				if(i instanceof Rotater) {
+					i.pointY += i.spd;
+					i.rotation += i.rotationSpd;
+					i.x = (int) ((i.displacement)*Math.cos(Math.toRadians(i.rotation))+ i.pointX);
+					i.y = (int) ((i.displacement)*Math.sin(Math.toRadians(i.rotation))+ i.pointY);
+				}
 			}
 			for(int i=0; i<enemyCache.size(); i++) {
 				if(enemyCache.get(i).y>WINH) enemyCache.remove(i);
@@ -592,6 +705,7 @@ public class SpaceGame implements ActionListener {
 		public void checkDeath() {
 			for(int e = 0; e<enemyCache.size(); e++) {
 				if(enemyCache.get(e).hp <= 0) {
+					if(randNum.nextInt(1,2+1) == 2) powerCache.add(new Powerups(enemyCache.get(e).x, enemyCache.get(e).y));
 					enemyCache.remove(e);
 					createSound("kill noise.wav");
 					kills++;
@@ -600,6 +714,46 @@ public class SpaceGame implements ActionListener {
 		}
 		
 	};
+	
+	void movePowerup() {
+		for (Powerups p: powerCache) {
+				p.y += 5;
+		}
+	}
+
+	//deletes power if it intersects with the player
+	void deletePower() {
+		for (int i = 0; i < powerCache.size(); i++) {
+			if (powerCache.get(i).intersect || powerCache.get(i).y>WINH) powerCache.remove(i);
+		}
+	}
+
+	//checks if the player intersects with powerup, if so a powrup is given
+	void checkpUPColl() {
+
+		for (Powerups p: powerCache) {
+			// creates a rectangle to check if the player intersect it
+			Rectangle powerup = new Rectangle(p.x,p.y,p.diameter,p.diameter);
+
+			//depending on the powerup's diameter, a specific stat is given
+			//generally, the smaller the diameter, the better the power up
+			if (powerup.intersects(player)) {
+				switch(p.diameter) {
+				case 5:
+					weaponState = randNum.nextInt(1,3+1);
+					break;
+				case 7:
+					playerstats.jetFuel += 55;
+					break;
+				case 10:
+					playerstats.hp +=1;
+					break;
+				}
+				//makes it so that delete method knows which powerup to delete
+				p.intersect = true;
+			}
+		}	
+	}
 	
 	void createSound(String audioFileName) {
 		Clip playerShootNoise = null;
