@@ -12,3 +12,7 @@ interface GameFunctions {
 	void checkCollision();
 	void checkDeath();
 }
+
+interface shootType {
+	void shoot(int x, int y);
+}
