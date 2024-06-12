@@ -63,7 +63,7 @@ class Tanker extends Enemy {
 	Tanker() {
 		this.hp=4;
 		this.iFrames=75;
-		this.size=24;
+		this.size=30;
 		this.firerate=1000;
 		this.fireBuffer=0;
 		this.untilFire=0;
@@ -76,7 +76,7 @@ class Tanker extends Enemy {
 	Tanker(int x, int y) {
 		this.hp=4;
 		this.iFrames=75;
-		this.size=24;
+		this.size=30;
 		this.firerate=1000;
 		this.fireBuffer=0;
 		this.untilFire=0;
