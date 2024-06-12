@@ -3,28 +3,32 @@ package entities;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 
-import hsa2.GraphicsConsole;
 import main.GeneralUtil;
+import main.ProjectileRegistry;
 import main.SpaceGame;
 
 @SuppressWarnings("serial")
+/**The player class, handles input and making projectiles**/
 public class Player extends EntityBase {
 	
+	//Unimplemented variables for a boost button
 	int boostedSpeed, fuel;
 	
 	public int iFrames;
 	
 	public boolean boostCooldown;
 	
-	public int firerate = 5;
+	/**How quickly can the player fires projectiles**/
+	public int firerate = 50;
 	
 	public Player(int x, int y, int width, int height, SpaceGame game) {
 		super(x, y, width, height, game);
 		maxSpeed = 3;
 	}
 	
+	/**Prevents the player from dying (for testing)**/
 	public void onDead() {
-    	
+    	health = 10;
     }
     
 	@Override
@@ -37,12 +41,12 @@ public class Player extends EntityBase {
     	gc.setColor(new Color(255,255,0));
     	GeneralUtil.rectFromRectangle(this, gc);
     }
-    
+	
+    /**Spawns the player projectiles**/
     public void makeAttack() {
-    	if(System.currentTimeMillis() % firerate == 0 && gc.getMouseClick() > 0) {
-    		
+    	if(game.ticks % firerate == 0 && gc.getMouseClick() > 0) {
+           game.spawnEntity(ProjectileRegistry.getPlayerProjectile(x, y - 20, 5, 5, game));
     	}
-    		
     }
     @Override
     public void move() {
@@ -51,7 +55,7 @@ public class Player extends EntityBase {
     	handleInput();
     	super.move();
     }
-    
+    /**Normalization code, not made by me, credit to Rajdeep**/
     public void handleInput() {
     	int normalization = 0;
 		if(gc.isKeyDown(KeyEvent.VK_W) || gc.isKeyDown(KeyEvent.VK_UP)) {

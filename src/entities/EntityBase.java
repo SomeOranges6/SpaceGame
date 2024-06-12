@@ -6,12 +6,13 @@ import java.util.Random;
 import hsa2.GraphicsConsole;
 import main.SpaceGame;
 
+/**Base class which every entity extends from **/
 @SuppressWarnings("serial")
 public abstract class EntityBase extends Rectangle {
 	
 	GraphicsConsole gc;
 	
-	SpaceGame theGame;
+	SpaceGame game;
 	
 	static Random rand = new Random();
 	
@@ -25,43 +26,47 @@ public abstract class EntityBase extends Rectangle {
     
     public int maxSpeed;
     
+	//Whether entities should bounce off the edges
     public boolean bounce = true;
-    
+
     public EntityBase(int x, int y, int width, int height, SpaceGame game) {
 		super(x,y,width,height);
 		this.gc = game.gcGame;
-		theGame = game;
+		this.game = game;
 	}
     
-    public void onDead() {
-    	theGame.deleteEntity(this);
-    }
-    
+	/**ticks every milisecond, handles moving and checking for death**/
     public void update() {
     	move();
+        if(health <= 0)
+            onDead();
+    }
+	
+	/**If the entity dies, remove it  **/
+    public void onDead() {
+        game.removeEntity(this);
     }
     
-    public void draw() {
-    	
-    }
+	/**Handles the rendering of the entities**/
+    public abstract void draw()
     
+	//**Basic movement method **/
     public void move() {
     	
-	   if(x + vX >= gc.getWidth() - width || x + vX <= width) {
-	 	   vX *= bounce ? -1 : 1;
+	   if(x + vX >= gc.getWidth() - width || x + vX <= 0) {
+	 	  // vX *= bounce ? -1 : 0;
 	   }
 	    
-	   if(y + vY >= gc.getHeight() - height || y + vY <= height) {
-	 	   vY *= bounce ? -1 : 1;
+	   if(y + vY >= gc.getHeight() - height || y + vY <= 0) {
+	 	  // vY *= bounce ? -1 : 0;
 	   }
  	  
  	   x += vX;
  	   y += vY;
     }
     
-    public void onCollision(EntityBase e) {
-    	
-    }
+	/**Handles collision with a projectile or entity**/
+    public abstract void onCollision(EntityBase e)
     
     
     
