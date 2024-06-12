@@ -1,7 +1,7 @@
 package spaceGame;
 
 interface Waves  {
-	void wave() throws InterruptedException;
+	void wave();
 }
 
 interface GameFunctions {

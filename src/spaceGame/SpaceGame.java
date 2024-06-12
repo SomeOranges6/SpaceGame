@@ -34,7 +34,7 @@ public class SpaceGame implements ActionListener {
 	public int ms_sleep = 1000/60; //it's 60fps... but not.
 	Random randNum = new Random();
 	
-	public int currentWave = 0, difficulty = 0, kills=0;
+	public int currentWave = 0, waveAccumulator=0, difficulty = 0, kills=0;
 	//P.S. I tried to get a timeSurvived variable going. It was never accurate.
 	public boolean canUseJets = true;
 	public int enemyCD = 2503, starCD = 50;
@@ -380,25 +380,9 @@ public class SpaceGame implements ActionListener {
 		
 		//infinite enemies spawn based on a timer
 		if(ev.getSource() == enemySpawn) {
-				/*int chance = randNum.nextInt(1,7+1);
-				if(chance==7) enemyCache.add(new Tanker(randNum.nextInt(0,WINB-20), 0));
-				else if(chance>5) {
-					int randomPointX = randNum.nextInt(50,WINB-68);
-					enemyCache.add(new Rotater(randomPointX, -50, 50, 0));
-					enemyCache.add(new Rotater(randomPointX, -50, 50, 90));
-					enemyCache.add(new Rotater(randomPointX, -50, 50, 180));
-					enemyCache.add(new Rotater(randomPointX, -50, 50, 270));
-				}
-				else {
-					enemyCache.add(new Liner(randNum.nextInt(0,WINB-16), 0));
-					if (chance<3)enemyCache.get(enemyCache.size()-1).rotation = 90;
-				}*/
-				try {
-					easyWaves[0].wave();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				waveAccumulator++;
+				if(waveAccumulator==3) currentWave++;
+				easyWaves[currentWave].wave();
 		}
 		
 		//keeps track of when enemies should fire. It is coded so they all don't fire at the same time
@@ -422,57 +406,6 @@ public class SpaceGame implements ActionListener {
 
 	}
 	
-	shootType[] playerWeapons = {
-		new shootType() { public void shoot(int x, int y) {
-				playerstats.firerate = 500;
-				playerShoots.stop();
-				playerShoots.setInitialDelay(playerstats.firerate);
-				playerShoots.restart();
-				Player_lineProjectile projRect = new Player_lineProjectile(0,0);
-				projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y));
-				createSound("player laser shoot.wav");
-			}
-		},
-		new shootType() { public void shoot(int x, int y) {
-				playerstats.firerate = 450;
-				playerShoots.stop();
-				playerShoots.setInitialDelay(playerstats.firerate);
-				playerShoots.restart();
-				Player_lineProjectile projRect = new Player_lineProjectile(0,0);
-				projectileCache.add(new Player_lineProjectile(x-projRect.size/2-playerstats.size/2, y));
-				projectileCache.add(new Player_lineProjectile(x-projRect.size/2+playerstats.size/2, y));
-				createSound("player laser shoot.wav");
-				createSound("player laser shoot.wav");
-			}
-		},
-		new shootType() { public void shoot(int x, int y) {
-				playerstats.firerate = 1050;
-				playerShoots.stop();
-				playerShoots.setInitialDelay(playerstats.firerate);
-				playerShoots.restart();
-				Player_lineProjectile projRect = new Player_lineProjectile(0,0);
-				projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 45));
-				projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 67));
-				projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 90));
-				projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 113));
-				projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 135));
-				createSound("player laser shoot.wav");
-				createSound("player laser shoot.wav");
-				createSound("player laser shoot.wav");
-			}
-		},
-		new shootType() { public void shoot(int x, int y) {
-				playerstats.firerate = 220;
-				playerShoots.stop();
-				playerShoots.setInitialDelay(playerstats.firerate);
-				playerShoots.restart();
-				Player_lineProjectile projRect = new Player_lineProjectile(0,0);
-				projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y));
-				createSound("player laser shoot.wav");
-			}
-		},
-	};
-	
 	/*
 	 * An array of methods that contain the actions for the easy difficulty waves
 	*/
@@ -485,9 +418,21 @@ public class SpaceGame implements ActionListener {
 				enemyCache.add(new Liner(75+i*100, -60, 90));
 				enemyCache.get(enemyCache.size()-1).fireBuffer = 500;
 			}
+			enemySpawn.stop();
+			enemySpawn.setInitialDelay(10000);
+			enemySpawn.restart();
+			
 		}},
 		new Waves() {public void wave() { //Wave 2
-			System.out.println("eeeeeee more");
+			for(int i=0; i<enemyCache.size(); i++) {
+				enemyCache.remove(0);
+			}
+			for(int i=0; i<4; i++) {
+				enemyCache.add(new Tanker(i*100, 0));
+			}
+			enemySpawn.stop();
+			enemySpawn.setInitialDelay(17000);
+			enemySpawn.restart();
 		}},
 		new Waves() {public void wave() { //Wave 3
 			System.out.println("stap it");
@@ -500,6 +445,57 @@ public class SpaceGame implements ActionListener {
 		}}
 		
 	};
+	
+	shootType[] playerWeapons = {
+			new shootType() { public void shoot(int x, int y) {
+					playerstats.firerate = 500;
+					playerShoots.stop();
+					playerShoots.setInitialDelay(playerstats.firerate);
+					playerShoots.restart();
+					Player_lineProjectile projRect = new Player_lineProjectile(0,0);
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y));
+					createSound("player laser shoot.wav");
+				}
+			},
+			new shootType() { public void shoot(int x, int y) {
+					playerstats.firerate = 425;
+					playerShoots.stop();
+					playerShoots.setInitialDelay(playerstats.firerate);
+					playerShoots.restart();
+					Player_lineProjectile projRect = new Player_lineProjectile(0,0);
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2-playerstats.size/2, y));
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2+playerstats.size/2, y));
+					createSound("player laser shoot.wav");
+					createSound("player laser shoot.wav");
+				}
+			},
+			new shootType() { public void shoot(int x, int y) {
+					playerstats.firerate = 850;
+					playerShoots.stop();
+					playerShoots.setInitialDelay(playerstats.firerate);
+					playerShoots.restart();
+					Player_lineProjectile projRect = new Player_lineProjectile(0,0);
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 45));
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 67));
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 90));
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 113));
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 135));
+					createSound("player laser shoot.wav");
+					createSound("player laser shoot.wav");
+					createSound("player laser shoot.wav");
+				}
+			},
+			new shootType() { public void shoot(int x, int y) {
+					playerstats.firerate = 220;
+					playerShoots.stop();
+					playerShoots.setInitialDelay(playerstats.firerate);
+					playerShoots.restart();
+					Player_lineProjectile projRect = new Player_lineProjectile(0,0);
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y));
+					createSound("player laser shoot.wav");
+				}
+			},
+		};
 	
 	/*
 	 * Interface that contains methods for player movement
