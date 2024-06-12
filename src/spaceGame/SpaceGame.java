@@ -5,6 +5,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Random;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 
 import javax.sound.sampled.AudioInputStream;
@@ -240,7 +241,6 @@ public class SpaceGame implements ActionListener {
 				playerShoots.start();
 				enemySpawn.start();
 				enemyShoots.start();
-				starSpawn.start();
 				easyTimer.start();
 				difficulty = 1;
 				heavensHellSentGift.loop(Clip.LOOP_CONTINUOUSLY);
@@ -282,13 +282,7 @@ public class SpaceGame implements ActionListener {
 			game.setColor(new Color(15,60,15,203));
 			game.drawRect(0, 200, WINB, 400); 
 			
-			//drawing stars
-			try {
-				for(Background b: stars) {
-					game.setColor(new Color(b.R,b.G,b.B, 25));
-					game.drawOval(b.x, b.y, b.size, b.size);
-				}
-			} catch(ConcurrentModificationException oops) {}
+			drawBackground();
 			
 			//drawing player
 			if(playerstats.active_iFrames>0) {
@@ -352,23 +346,23 @@ public class SpaceGame implements ActionListener {
 	public void drawBackground() {
 		if(initial) {
 			for(int i = 0; i < 300 ; i++) {
-				stars.add( new Integer[]{rand.nextInt(10, 590),rand.nextInt(10, 590)});
+				stars.add( new Integer[]{randNum.nextInt(10, 590), randNum.nextInt(10, 590)});
 		    }
 			initial = false;
 		}
 		
 		for(Integer[] coord : stars) {
-			int c = rand.nextInt(56, 256);
+			int c = randNum.nextInt(56, 256);
 			int b = 246;
-			gcGame.setColor(new Color(c, c, b, 20));
-			gcGame.fillPolygon(GeneralUtil.fourPointStar(coord[0],coord[1], 2));
+			game.setColor(new Color(c, c, b, 20));
+			game.fillPolygon(fourPointStar(coord[0],coord[1], 2));
 		
 			coord[1]--;
-			gcGame.setColor(new Color(c - 10, c - 10, b - 10, 60));
-			gcGame.fillPolygon(GeneralUtil.fourPointStar(coord[0], coord[1], 1));
+			game.setColor(new Color(c - 10, c - 10, b - 10, 60));
+			game.fillPolygon(fourPointStar(coord[0], coord[1], 1));
 		}
 		
-		stars.add(new Integer[]{rand.nextInt(10, 590),gcGame.getHeight() - 30});
+		stars.add(new Integer[]{randNum.nextInt(10, 590), game.getHeight() - 30});
 		if(stars.get(0)[1] > 600)
 			stars.remove(0);
 		
@@ -399,7 +393,12 @@ public class SpaceGame implements ActionListener {
 					enemyCache.add(new Liner(randNum.nextInt(0,WINB-16), 0));
 					if (chance<3)enemyCache.get(enemyCache.size()-1).rotation = 90;
 				}*/
-				easyWaves[0].wave();
+				try {
+					easyWaves[0].wave();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 		
 		//keeps track of when enemies should fire. It is coded so they all don't fire at the same time
@@ -420,10 +419,7 @@ public class SpaceGame implements ActionListener {
 		}
 		
 		//spawn and move stars in the background
-		if(ev.getSource() == starSpawn) {
-			stars.add(new Background());
-			moveStars();
-		}
+
 	}
 	
 	shootType[] playerWeapons = {
@@ -797,6 +793,21 @@ public class SpaceGame implements ActionListener {
 				e.printStackTrace();
 			}
 
+	}
+	
+	public static Polygon fourPointStar(int x, int y, int r) {
+		   
+		   Polygon poly = new Polygon();
+		   poly.addPoint(x + 4 * r, y);
+		   poly.addPoint(x + 2 * r, y + 1 * r);
+		   poly.addPoint(x, y + 4 * r);
+		   poly.addPoint(x - 2 * r, y + 1 * r);
+		   poly.addPoint(x - 4 * r, y);
+		   poly.addPoint(x - 2 * r, y - 1 * r);
+		   poly.addPoint(x, y - 4 * r);
+		   poly.addPoint(x + 2 * r, y - 1 * r);
+		   return poly;
+		   
 	}
 	
 }
