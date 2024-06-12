@@ -3,8 +3,8 @@ package entities;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 
-import hsa2.GraphicsConsole;
 import main.GeneralUtil;
+import main.ProjectileRegistry;
 import main.SpaceGame;
 
 @SuppressWarnings("serial")
@@ -16,7 +16,7 @@ public class Player extends EntityBase {
 	
 	public boolean boostCooldown;
 	
-	public int firerate = 5;
+	public int firerate = 50;
 	
 	public Player(int x, int y, int width, int height, SpaceGame game) {
 		super(x, y, width, height, game);
@@ -24,7 +24,7 @@ public class Player extends EntityBase {
 	}
 	
 	public void onDead() {
-    	
+    	health = 10;
     }
     
 	@Override
@@ -39,10 +39,9 @@ public class Player extends EntityBase {
     }
     
     public void makeAttack() {
-    	if(System.currentTimeMillis() % firerate == 0 && gc.getMouseClick() > 0) {
-    		
+    	if(game.ticks % firerate == 0 && gc.getMouseClick() > 0) {
+           game.spawnEntity(ProjectileRegistry.getPlayerProjectile(x, y - 20, 5, 5, game));
     	}
-    		
     }
     @Override
     public void move() {

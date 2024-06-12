@@ -29,3 +29,12 @@ module-info.java
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+*.iml
+/shelf/
+/workspace.xml
+/misc.xml
+/modules.xml
+/vcs.xml
+SpaceGame.iml
+/SpaceGame.xml
+/SpaceGame.iml
