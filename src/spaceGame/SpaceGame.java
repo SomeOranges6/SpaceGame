@@ -41,7 +41,6 @@ public class SpaceGame implements ActionListener {
 	
 	public ArrayList<Projectile> projectileCache = new ArrayList<Projectile>();
 	public ArrayList<Enemy> enemyCache = new ArrayList<Enemy>();
-	public ArrayList<Background> stars = new ArrayList<Background>();
 	public ArrayList<Boss> bossCache = new ArrayList<Boss>(); //Who knows if we do more than one boss at once
 	public Player playerstats = new Player();
 	public Rectangle player = new Rectangle(playerstats.x, playerstats.y, playerstats.size, playerstats.size);
@@ -57,8 +56,9 @@ public class SpaceGame implements ActionListener {
 	public Timer playerShoots = new Timer(playerstats.firerate, this);
 	public Timer enemySpawn = new Timer(enemyCD, this);
 	public Timer enemyShoots = new Timer(ms_sleep, this); public int enemyShotAccumulator = 0;
-	public Timer starSpawn = new Timer(starCD, this);
 	public Timer easyTimer = new Timer(10000, this); //for rounds lasting too long maybe
+
+	public ArrayList<Integer[]> stars = new ArrayList<>();
 	
 	boolean loaded = false;
 	Clip heavensHellSentGift = null;
@@ -348,12 +348,31 @@ public class SpaceGame implements ActionListener {
 	/*
 	 * This method moves the stars that spawn
 	*/
-	void moveStars() {
-		for(int b=0; b<stars.size(); b++) {
-			stars.get(b).y += stars.get(b).spd;
-			if(stars.get(b).y>WINH) stars.remove(b);
+	boolean initial = true;
+	public void drawBackground() {
+		if(initial) {
+			for(int i = 0; i < 300 ; i++) {
+				stars.add( new Integer[]{rand.nextInt(10, 590),rand.nextInt(10, 590)});
+		    }
+			initial = false;
 		}
-	}
+		
+		for(Integer[] coord : stars) {
+			int c = rand.nextInt(56, 256);
+			int b = 246;
+			gcGame.setColor(new Color(c, c, b, 20));
+			gcGame.fillPolygon(GeneralUtil.fourPointStar(coord[0],coord[1], 2));
+		
+			coord[1]--;
+			gcGame.setColor(new Color(c - 10, c - 10, b - 10, 60));
+			gcGame.fillPolygon(GeneralUtil.fourPointStar(coord[0], coord[1], 1));
+		}
+		
+		stars.add(new Integer[]{rand.nextInt(10, 590),gcGame.getHeight() - 30});
+		if(stars.get(0)[1] > 600)
+			stars.remove(0);
+		
+   }
 
 	/*
 	 * Timer method where Timers are utilized
