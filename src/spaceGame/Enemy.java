@@ -41,6 +41,19 @@ class Liner extends Enemy {
 		this.spd = 2;
 		this.rotation = randNum.nextInt(-135,-45+1)*-1;
 	}
+	
+	Liner(int x, int y, double rotation) {
+		this.hp=1;
+		this.iFrames=25;
+		this.size=16;
+		this.firerate=1000;
+		this.fireBuffer=0;
+		this.untilFire=0;
+		this.x=x;
+		this.y=y;
+		this.spd = 2;
+		this.rotation = rotation;
+	}
 
 }
 
@@ -56,7 +69,7 @@ class Tanker extends Enemy {
 		this.untilFire=0;
 		this.x=WINB/2;
 		this.y=0;
-		this.spd = 3;
+		this.spd = 4;
 		this.rotation = 0;
 	}
 	
@@ -69,7 +82,7 @@ class Tanker extends Enemy {
 		this.untilFire=0;
 		this.x=x;
 		this.y=y;
-		this.spd = 3;
+		this.spd = randNum.nextInt(3,4+1);
 		this.rotation = 0;
 	}
 	
