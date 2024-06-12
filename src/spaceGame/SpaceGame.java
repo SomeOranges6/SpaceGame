@@ -36,7 +36,7 @@ public class SpaceGame implements ActionListener {
 	public int currentWave = 0, difficulty = 0, kills=0;
 	//P.S. I tried to get a timeSurvived variable going. It was never accurate.
 	public boolean canUseJets = true;
-	public int enemyCD = 2003, starCD = 50;
+	public int enemyCD = 2503, starCD = 50;
 	public int weaponState = 0;
 	
 	public ArrayList<Projectile> projectileCache = new ArrayList<Projectile>();
@@ -367,7 +367,7 @@ public class SpaceGame implements ActionListener {
 		
 		//infinite enemies spawn based on a timer
 		if(ev.getSource() == enemySpawn) {
-				int chance = randNum.nextInt(1,7+1);
+				/*int chance = randNum.nextInt(1,7+1);
 				if(chance==7) enemyCache.add(new Tanker(randNum.nextInt(0,WINB-20), 0));
 				else if(chance>5) {
 					int randomPointX = randNum.nextInt(50,WINB-68);
@@ -379,7 +379,8 @@ public class SpaceGame implements ActionListener {
 				else {
 					enemyCache.add(new Liner(randNum.nextInt(0,WINB-16), 0));
 					if (chance<3)enemyCache.get(enemyCache.size()-1).rotation = 90;
-				}
+				}*/
+				easyWaves[0].wave();
 		}
 		
 		//keeps track of when enemies should fire. It is coded so they all don't fire at the same time
@@ -462,18 +463,23 @@ public class SpaceGame implements ActionListener {
 	*/
 	Waves[] easyWaves = {
 		new Waves() {public void wave() { //Wave 1
-			//these print statements are jokes. Put what each wave does here, delay spawns with Thread.sleep(int ms);
-			System.out.println("aaaaaa aliens"); 
-			}},
+			for(int i=0; i<5; i++) {
+				enemyCache.add(new Liner(75+i*100, 0, 90));
+			}
+			for(int i=0; i<5; i++) {
+				enemyCache.add(new Liner(75+i*100, -60, 90));
+				enemyCache.get(enemyCache.size()-1).fireBuffer = 500;
+			}
+		}},
 		new Waves() {public void wave() { //Wave 2
 			System.out.println("eeeeeee more");
-			}},
+		}},
 		new Waves() {public void wave() { //Wave 3
 			System.out.println("stap it");
-			}},
+		}},
 		new Waves() {public void wave() { //Wave 4
 			System.out.println("why u bulli me?");
-			}},
+		}},
 		new Waves() {public void wave() { //Boss Wave
 			System.out.println("ooo scary boss");
 		}}
@@ -621,30 +627,32 @@ public class SpaceGame implements ActionListener {
 		 * Moves all enemies
 		*/
 		public void move() {
-			for(Enemy i: enemyCache) {
-				if(i instanceof Liner) {
-					i.x = (int) ((i.spd)*Math.cos(Math.toRadians(i.rotation))+ i.x);
-					i.y = (int) ((i.spd)*Math.sin(Math.toRadians(i.rotation))+ i.y);
-					if(i.x>=WINB-i.size || i.x<=0) {
-						if(i.rotation > 90) i.rotation=45;
-						else i.rotation=135;
+			try {
+				for(Enemy i: enemyCache) {
+					if(i instanceof Liner) {
+						i.x = (int) ((i.spd)*Math.cos(Math.toRadians(i.rotation))+ i.x);
+						i.y = (int) ((i.spd)*Math.sin(Math.toRadians(i.rotation))+ i.y);
+						if(i.x>=WINB-i.size || i.x<=0) {
+							if(i.rotation > 90) i.rotation=45;
+							else i.rotation=135;
+						}
+					}
+					if(i instanceof Tanker) {
+						i.rotation = i.findRotation(i.x, i.y, player.x, player.y);
+						i.x = (int) ((i.spd)*Math.cos(Math.toRadians(i.rotation))+ i.x);
+						i.y = (int) ((i.spd)*Math.sin(Math.toRadians(i.rotation))+ i.y);
+					}
+					if(i instanceof Rotater) {
+						i.pointY += i.spd;
+						i.rotation += i.rotationSpd;
+						i.x = (int) ((i.displacement)*Math.cos(Math.toRadians(i.rotation))+ i.pointX);
+						i.y = (int) ((i.displacement)*Math.sin(Math.toRadians(i.rotation))+ i.pointY);
 					}
 				}
-				if(i instanceof Tanker) {
-					i.rotation = i.findRotation(i.x, i.y, player.x, player.y);
-					i.x = (int) ((i.spd)*Math.cos(Math.toRadians(i.rotation))+ i.x);
-					i.y = (int) ((i.spd)*Math.sin(Math.toRadians(i.rotation))+ i.y);
+				for(int i=0; i<enemyCache.size(); i++) {
+					if(enemyCache.get(i).y>WINH) enemyCache.remove(i);
 				}
-				if(i instanceof Rotater) {
-					i.pointY += i.spd;
-					i.rotation += i.rotationSpd;
-					i.x = (int) ((i.displacement)*Math.cos(Math.toRadians(i.rotation))+ i.pointX);
-					i.y = (int) ((i.displacement)*Math.sin(Math.toRadians(i.rotation))+ i.pointY);
-				}
-			}
-			for(int i=0; i<enemyCache.size(); i++) {
-				if(enemyCache.get(i).y>WINH) enemyCache.remove(i);
-			}
+			} catch(ConcurrentModificationException oops) {}
 		}
 
 		/*
@@ -771,4 +779,5 @@ public class SpaceGame implements ActionListener {
 			}
 
 	}
+	
 }
