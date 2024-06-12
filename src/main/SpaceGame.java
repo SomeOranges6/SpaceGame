@@ -27,7 +27,6 @@ public class SpaceGame {
 	boolean paused;
 	
 	static Player player;
-	public int[][] starPos = new int [500][2];
 	
 	public ArrayList<Integer[]> stars = new ArrayList<>();
 	
