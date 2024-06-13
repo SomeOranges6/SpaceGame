@@ -3,7 +3,8 @@ package spaceGame;
 @SuppressWarnings("serial")
 abstract class Enemy extends GameEntities {
 	public int hp, iFrames; //iFrames are not used
-	public int firerate, fireBuffer, untilFire;
+	public int firerate, fireBuffer, untilFire; 
+	boolean fireTrigger; //has the enemy fired? True(no) False(yes)
 	public double rotation;
 	int displacement = 0, rotationSpd, pointX, pointY; //for rotater
 	double findRotation(int x1, int y1, int x2, int y2) {
@@ -22,6 +23,7 @@ class Liner extends Enemy {
 		this.size=16;
 		this.firerate=1000;
 		this.fireBuffer=0;
+		this.fireTrigger = true;
 		this.untilFire=0;
 		this.x=WINB/2;
 		this.y=0;
@@ -35,6 +37,7 @@ class Liner extends Enemy {
 		this.size=16;
 		this.firerate=1000;
 		this.fireBuffer=0;
+		this.fireTrigger = true;
 		this.untilFire=0;
 		this.x=x;
 		this.y=y;
@@ -48,6 +51,7 @@ class Liner extends Enemy {
 		this.size=16;
 		this.firerate=1000;
 		this.fireBuffer=0;
+		this.fireTrigger = true;
 		this.untilFire=0;
 		this.x=x;
 		this.y=y;
@@ -98,6 +102,7 @@ class Rotater extends Enemy {
 		this.size=16;
 		this.firerate=1000;
 		this.fireBuffer=0;
+		this.fireTrigger = true;
 		this.untilFire=0;
 		this.x=0;
 		this.y=0;
@@ -115,6 +120,7 @@ class Rotater extends Enemy {
 		this.size=16;
 		this.firerate=1000;
 		this.fireBuffer=0;
+		this.fireTrigger = true;
 		this.untilFire=0;
 		this.x=0;
 		this.y=0;
@@ -132,6 +138,7 @@ class Rotater extends Enemy {
 		this.size=16;
 		this.firerate=1000;
 		this.fireBuffer=0;
+		this.fireTrigger = true;
 		this.untilFire=0;
 		this.x=0;
 		this.y=0;

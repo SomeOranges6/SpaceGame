@@ -10,8 +10,18 @@ class Background extends GameEntities {
 		this.y=0;
 		this.size=randNum.nextInt(1,5+1);
 		this.spd=randNum.nextInt(1,4+1);
-		this.R = randNum.nextInt(0,255+1);
-		this.G = randNum.nextInt(0,255+1);
-		this.B = randNum.nextInt(0,255+1);
+		this.R = randNum.nextInt(10,255+1);
+		this.G = randNum.nextInt(10,255+1);
+		this.B = randNum.nextInt(10,255+1);
+	}
+	
+	Background(int x, int y) {
+		this.x=x;
+		this.y=y;
+		this.size=randNum.nextInt(1,5+1);
+		this.spd=randNum.nextInt(1,4+1);
+		this.R = randNum.nextInt(10,255+1);
+		this.G = randNum.nextInt(10,255+1);
+		this.B = randNum.nextInt(10,255+1);
 	}
 }

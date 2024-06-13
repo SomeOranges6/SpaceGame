@@ -21,4 +21,3 @@ abstract class GameEntities extends Rectangle{
 
 	
 
-
