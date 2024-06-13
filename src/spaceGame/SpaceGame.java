@@ -5,6 +5,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Random;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
@@ -27,7 +28,7 @@ public class SpaceGame implements ActionListener {
 	//Initializing many, many, variables.
 	
 	//fonts
-	Font normalFont = new Font("Tahoma", Font.PLAIN, 32);
+	Font normalFont = new Font("Tahoma", Font.PLAIN, 16);
 	Font bigFont = new Font("Tahoma", Font.BOLD, 64);
 	Font gameOverFont = new Font("Tahoma", Font.BOLD, 64);
 	
@@ -52,6 +53,7 @@ public class SpaceGame implements ActionListener {
 	public ArrayList<Projectile> projectileCache = new ArrayList<Projectile>();
 	public ArrayList<Enemy> enemyCache = new ArrayList<Enemy>();
 	public ArrayList<Background> stars = new ArrayList<Background>();
+	public ArrayList<Background> backupStars = new ArrayList<Background>(); //to prevent stars from flashing
 	public ArrayList<Boss> bossCache = new ArrayList<Boss>(); //Who knows if we do more than one boss at once
 	public ArrayList<String> intructions = new ArrayList<String>();
 	public ArrayList<String> textCache = new ArrayList<String>();
@@ -317,7 +319,7 @@ public class SpaceGame implements ActionListener {
 		levels.add(wave4Button);
 		levels.add(bossButton);
 		
-		backgroundMusic.loop(backgroundMusic.LOOP_CONTINUOUSLY);
+		backgroundMusic.loop(Clip.LOOP_CONTINUOUSLY);
 		
 	}
 	
@@ -573,6 +575,10 @@ public class SpaceGame implements ActionListener {
 	 * This method is used to update the level screens
 	 */
 	void basicUpdate() {
+		updBackground();
+		deletePower();
+		movePowerup();
+		checkpUPColl();
 		playerFunctions.move();
 		playerFunctions.move_Projectiles();
 		playerFunctions.delete_Projectiles();
@@ -583,9 +589,7 @@ public class SpaceGame implements ActionListener {
 		enemyFunctions.delete_Projectiles();
 		enemyFunctions.checkCollision();
 		enemyFunctions.checkDeath();
-		deletePower();
-		movePowerup();
-		checkpUPColl();
+		
 	}
 	
 	/*
@@ -676,11 +680,23 @@ public class SpaceGame implements ActionListener {
 			
 			//drawing stars
 			try {
-				for(Background b: stars) {
-					game.setColor(new Color(b.R,b.G,b.B, 25));
-					game.drawOval(b.x, b.y, b.size, b.size);
+				for(Background star : stars) {
+					game.setColor(new Color(star.R, star.G, star.B, 5));
+					game.drawPolygon(fourPointStar(star.x,star.y, 2));
+				
+					game.setColor(new Color(star.R - 10, star.G - 10, star.B - 10, 10));
+					game.drawPolygon(fourPointStar(star.x, star.y, 1));
 				}
-			} catch(ConcurrentModificationException oops) {}
+			} catch(ConcurrentModificationException oops) {
+				backupStars = stars;
+				for(Background star : backupStars) {
+					game.setColor(new Color(star.R, star.G, star.B, 5));
+					game.drawPolygon(fourPointStar(star.x,star.y, 2));
+				
+					game.setColor(new Color(star.R - 10, star.G - 10, star.B - 10, 10));
+					game.drawPolygon(fourPointStar(star.x, star.y, 1));
+				}
+			}
 			
 			//drawing player
 			if(playerstats.active_iFrames>0) {
@@ -774,12 +790,6 @@ public class SpaceGame implements ActionListener {
 	/*
 	 * This method moves the stars that spawn
 	*/
-	void moveStars() {
-		for(int b=0; b<stars.size(); b++) {
-			stars.get(b).y += stars.get(b).spd;
-			if(stars.get(b).y>WINH) stars.remove(b);
-		}
-	}
 	
 	//for every powerup in the arraylist, it moves it down 5 pixels
 	void movePowerup() {
@@ -954,7 +964,7 @@ public class SpaceGame implements ActionListener {
 		
 		//the boss summons a total of 10 enemies
 		if (Boss.move.equals("SUMMON")) {
-			for (int i = 0; i < 10; i ++) {
+			for (int i = 0; i < Boss.summonAmount; i ++) {
 				enemyCache.add(new Liner(randNum.nextInt(0,WINB-16), 0));
 			}
 			//stops the boss from spawning 10 enemies every 5 miliseconds
@@ -1055,6 +1065,9 @@ public class SpaceGame implements ActionListener {
 		if(ev.getSource() == enemySpawn && level != 0) {
 			waveAccumulator++;
 			if(waveAccumulator==3) currentWave++;
+			if(waveAccumulator==7) currentWave++;
+			if(waveAccumulator==15) currentWave++;
+			if(waveAccumulator==30) currentWave++;
 			easyWaves[currentWave].wave();
 			
 	}
@@ -1080,7 +1093,6 @@ public class SpaceGame implements ActionListener {
 		//spawn and move stars in the background
 		if(ev.getSource() == starSpawn) {
 			stars.add(new Background());
-			moveStars();
 		}
 	}
 	
@@ -1101,33 +1113,53 @@ public class SpaceGame implements ActionListener {
 				enemySpawn.restart();
 				
 			}},
+			
 			new Waves() {public void wave() { //Wave 2
-				for(int i=0; i<enemyCache.size(); i++) {
-					enemyCache.remove(0);
-				}
+				//IF YOU NEED TO DELETE CERTAIN ENEMIES, USE COMMENTED OUT CODE BELOW
+				/*for(int i=enemyCache.size()-1; i>=0; i--) {
+					if(enemyCache.get(i) instanceof Liner) enemyCache.remove(i);
+				}*/
 				for(int i=0; i<4; i++) {
-					enemyCache.add(new Tanker(i*150, 0));
+					enemyCache.add(new Tanker(i*100, 0));
 				}
 				enemySpawn.stop();
-				enemySpawn.setInitialDelay(10000);
+				enemySpawn.setInitialDelay(8000);
 				enemySpawn.restart();
 			}},
+			
 			new Waves() {public void wave() { //Wave 3
-				for(int i=0; i<enemyCache.size(); i++) {
-					enemyCache.remove(0);
-				}
-				for(int i=0; i<4; i++) {
-					enemyCache.add(new Rotater(i*150, 0, 90));
-				}
-				enemySpawn.stop();
-				enemySpawn.setInitialDelay(10000);
+				int randomPointX = randNum.nextInt(50,WINB-68);
+	            enemyCache.add(new Rotater(randomPointX, -50, 50, 0));
+	            enemyCache.add(new Rotater(randomPointX, -50, 50, 90));
+	            enemyCache.add(new Rotater(randomPointX, -50, 50, 180));
+	            enemyCache.add(new Rotater(randomPointX, -50, 50, 270));
+	            enemySpawn.stop();
+				enemySpawn.setInitialDelay(5000);
 				enemySpawn.restart();
 			}},
+			
 			new Waves() {public void wave() { //Wave 4
-				System.out.println("why u bulli me?");
+				int chance = randNum.nextInt(1,7+1);
+	            if(chance==7) enemyCache.add(new Tanker(randNum.nextInt(0,WINB-20), 0));
+	            else if(chance>5) {
+	                int randomPointX = randNum.nextInt(50,WINB-68);
+	                enemyCache.add(new Rotater(randomPointX, -50, 50, 0));
+	                enemyCache.add(new Rotater(randomPointX, -50, 50, 90));
+	                enemyCache.add(new Rotater(randomPointX, -50, 50, 180));
+	                enemyCache.add(new Rotater(randomPointX, -50, 50, 270));
+	            }
+	            else {
+	                enemyCache.add(new Liner(randNum.nextInt(0,WINB-16), 0));
+	                if (chance<3)enemyCache.get(enemyCache.size()-1).rotation = 90;
+	            }
+	            enemySpawn.stop();
+				enemySpawn.setInitialDelay(5000);
+				enemySpawn.restart();
 			}},
+			
 			new Waves() {public void wave() { //Boss Wave
-				System.out.println("ooo scary boss");
+				enemySpawn.stop();
+				bossAttack.start();
 			}}
 			
 		};
@@ -1251,7 +1283,8 @@ public class SpaceGame implements ActionListener {
 		public void move_Projectiles() {
 			for(Projectile i: projectileCache) {
 				if(i instanceof Player_lineProjectile) {
-					i.y -= i.spd;
+					i.x = (int) ((i.spd)*Math.cos(Math.toRadians(i.rotation))+ i.x);
+					i.y = (int) ((i.spd)*Math.sin(Math.toRadians(i.rotation))+ i.y);
 				}
 			}
 		}
@@ -1417,4 +1450,39 @@ public class SpaceGame implements ActionListener {
 		
 		
 	};
+	
+	public static Polygon fourPointStar(int x, int y, int r) {
+		   
+		   Polygon poly = new Polygon();
+		   poly.addPoint(x + 4 * r, y);
+		   poly.addPoint(x + 2 * r, y + 1 * r);
+		   poly.addPoint(x, y + 4 * r);
+		   poly.addPoint(x - 2 * r, y + 1 * r);
+		   poly.addPoint(x - 4 * r, y);
+		   poly.addPoint(x - 2 * r, y - 1 * r);
+		   poly.addPoint(x, y - 4 * r);
+		   poly.addPoint(x + 2 * r, y - 1 * r);
+		   return poly;
+		   
+	}
+	
+	boolean initial = true;
+	public void updBackground() {
+		if(initial) {
+			for(int i = 0; i < 300 ; i++) {
+				stars.add(new Background(randNum.nextInt(10, 590), randNum.nextInt(10, 590)));
+		    }
+			initial = false;
+		}
+		
+		try {
+			for(Background star : stars) {
+				star.y += star.spd;
+			}
+		} catch(ConcurrentModificationException oops) {}
+		
+		for(int i=0; i<stars.size(); i++) {
+			if(stars.get(i).y > WINH) stars.remove(i);
+		}	
+}
 }
