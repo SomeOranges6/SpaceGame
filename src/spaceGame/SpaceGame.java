@@ -28,7 +28,7 @@ public class SpaceGame implements ActionListener {
 	//Initializing many, many, variables.
 	
 	//fonts
-	Font normalFont = new Font("Tahoma", Font.PLAIN, 32);
+	Font normalFont = new Font("Tahoma", Font.PLAIN, 16);
 	Font bigFont = new Font("Tahoma", Font.BOLD, 64);
 	Font gameOverFont = new Font("Tahoma", Font.BOLD, 64);
 	
@@ -69,7 +69,7 @@ public class SpaceGame implements ActionListener {
 	//Rectangles
 	public Rectangle player = new Rectangle(playerstats.x, playerstats.y, playerstats.size, playerstats.size);
 	public Rectangle limit = new Rectangle(0,200, WINB,400);
-	public Rectangle rBoss = new Rectangle(Boss.x,Boss.y,Boss.size,Boss.size-10);
+	public Rectangle rBoss = new Rectangle(Boss.x+10,Boss.y+10,Boss.size-20,Boss.size-30);
 	public Rectangle rtitle = new Rectangle(0,0,400,200);
 	public Rectangle r2 = new Rectangle(210, 300, 150, 50);
 	public Rectangle r3 = new Rectangle(210, 400, 150, 50);
@@ -135,6 +135,7 @@ public class SpaceGame implements ActionListener {
 	boolean smash = false;
 	boolean drawAttack = false;
 	boolean loaded = false;
+	boolean powerupSound = false; //Not in the actual game, Rajdeep just added this for his own sanity
 	
 	//IMAGE LOADER
 	static BufferedImage loadImage(String fileName) {
@@ -357,7 +358,7 @@ public class SpaceGame implements ActionListener {
 		levels.add(wave4Button);
 		levels.add(bossButton);
 		
-		backgroundMusic.loop(backgroundMusic.LOOP_CONTINUOUSLY);
+		backgroundMusic.loop(Clip.LOOP_CONTINUOUSLY);
 		
 	}
 	
@@ -475,6 +476,9 @@ public class SpaceGame implements ActionListener {
 		enemySpawn.restart(); enemySpawn.stop(); 
 		enemyShoots.restart(); enemyShoots.stop(); 
 		easyTimer.restart(); easyTimer.stop(); 
+		bossAttack.restart(); bossAttack.stop(); 
+		BossCD.restart(); BossCD.stop();
+		starSpawn.restart(); starSpawn.stop();
 		gameOver.setFont(bigFont);
 		gameOver.setLocationRelativeTo(null);
 		gameOver.setBackgroundColor(new Color(0,0,0));
@@ -507,6 +511,9 @@ public class SpaceGame implements ActionListener {
 		enemySpawn.restart(); enemySpawn.stop(); 
 		enemyShoots.restart(); enemyShoots.stop(); 
 		easyTimer.restart(); easyTimer.stop(); 
+		bossAttack.restart(); bossAttack.stop(); 
+		BossCD.restart(); BossCD.stop();
+		starSpawn.restart(); starSpawn.stop();
 		winner.setFont(bigFont);
 		winner.setLocationRelativeTo(null);
 		winner.setBackgroundColor(new Color(0,0,0));
@@ -703,19 +710,19 @@ public class SpaceGame implements ActionListener {
 			//drawing stars
 			try {
 				for(Background star : stars) {
-					game.setColor(new Color(star.R, star.G, star.B, 5));
+					game.setColor(new Color(star.R, star.G, star.B, 8));
 					game.drawPolygon(fourPointStar(star.x,star.y, 2));
 				
-					game.setColor(new Color(star.R - 10, star.G - 10, star.B - 10, 10));
+					game.setColor(new Color(star.R - 10, star.G - 10, star.B - 10, 15));
 					game.drawPolygon(fourPointStar(star.x, star.y, 1));
 				}
 			} catch(ConcurrentModificationException oops) {
 				backupStars = stars;
 				for(Background star : backupStars) {
-					game.setColor(new Color(star.R, star.G, star.B, 5));
+					game.setColor(new Color(star.R, star.G, star.B, 8));
 					game.drawPolygon(fourPointStar(star.x,star.y, 2));
 				
-					game.setColor(new Color(star.R - 10, star.G - 10, star.B - 10, 10));
+					game.setColor(new Color(star.R - 10, star.G - 10, star.B - 10, 15));
 					game.drawPolygon(fourPointStar(star.x, star.y, 1));
 				}
 			}
@@ -767,8 +774,8 @@ public class SpaceGame implements ActionListener {
 			 */
 			if (drawAttack) {
 				if (Boss.move.equals("ROCK")) {
-					game.drawImage(rock,b1.x, b1.y, b1.width, b1.height);
-					game.drawImage(rock,b2.x, b2.y, b2.width, b2.height);
+					game.drawImage(rock,b1.x-10, b1.y-10, b1.width+20, b1.height+20);
+					game.drawImage(rock,b2.x-10, b2.y-10, b2.width+20, b2.height+20);
 				}
 				if (Boss.move.equals("LASER")) {
 					game.setColor(Color.RED);
@@ -776,8 +783,8 @@ public class SpaceGame implements ActionListener {
 					game.fillRect(b2.x, b2.y, b2.width, b2.height);
 				}
 				if (Boss.move.equals("AST")) {
-					game.drawImage(ast,b1.x, b1.y, b1.width, b1.height);
-					game.drawImage(ast,b2.x, b2.y, b2.width, b2.height);
+					game.drawImage(ast,b1.x-10, b1.y-10, b1.width+20, b1.height+20);
+					game.drawImage(ast,b2.x-10, b2.y-10, b2.width+20, b2.height+20);
 				}
 				if (Boss.move.equals("BLAST")) {
 					game.setColor(Color.PINK);
@@ -849,7 +856,7 @@ public class SpaceGame implements ActionListener {
 				//depending on the powerup's diameter, a specific stat is given
 				//generally, the smaller the diameter, the better the power up
 				if (powerup.intersects(player)) {
-					createSound("powerup.wav");
+					if(powerupSound==true) createSound("powerup.wav");
 					switch(p.diameter) {
 					case 5:
 						weaponState = randNum.nextInt(1,3+1);
@@ -872,7 +879,8 @@ public class SpaceGame implements ActionListener {
 		
 		//makes the boss more side to side
 		Boss.rotation++;
-		Boss.x = (int) ((50)*Math.cos(Math.toRadians(Boss.rotation))+WINB/2-Boss.size/2);
+		Boss.x = (int) ((75)*Math.cos(Math.toRadians(Boss.rotation))+WINB/2-Boss.size/2);
+		rBoss.x = (int) ((75)*Math.cos(Math.toRadians(Boss.rotation))+WINB/2-Boss.size/2);
 		
 		//checks if dead
 		if (Boss.hp <= 0) {
@@ -912,18 +920,18 @@ public class SpaceGame implements ActionListener {
 			}
 			
 			//lowers it to player poisition
-			if (b1.y < player.y) {
+			if (b1.y < player.y-b1.height/2) {
 				if (b1.x == 0 && b2.x == 550) {
-					b1.y += 20;
-					b2.y += 20;
+					b1.y += 30;
+					b2.y += 30;
 				}
 			}
 			
 			//the smash variable was used so that it waited before attacking
 			if (smash) {
 				if (b1.x+ b1.width < 300 && b2.x> 300) {
-					b1.x += 30;
-					b2.x -= 30;
+					b1.x += 20;
+					b2.x -= 20;
 				}
 				if (b1.x >= 75) createSound("rock.wav");
 				if (b1.x + b1.width >= 300 && b2.x <=300) {
@@ -962,10 +970,10 @@ public class SpaceGame implements ActionListener {
 				b1.height = 100;
 				b2.width = 100;
 				b2.height = 100;
-				b1.x += player.x/20;
-				b1.y += player.y/20;
-				b2.x -= (575 - player.x)/20;
-				b2.y += player.y/20;
+				b1.x += (player.x+b1.width/2)/40;
+				b1.y += (player.y+b1.height)/40;
+				b2.x -= (575 - (player.x+b1.width/2))/40;
+				b2.y += (player.y+b1.height)/40;
 				checkAttackColl();
 			}
 			charged +=1;
@@ -1000,7 +1008,7 @@ public class SpaceGame implements ActionListener {
 		//the boss summons a total of 6 enemies
 		if (Boss.move.equals("SUMMON")) {
 			for (int i = 0; i < Boss.summonAmount; i ++) {
-				enemyCache.add(new Liner(randNum.nextInt(0,WINB-16), 0));
+				if(enemyCache.size()<10)enemyCache.add(new Liner(randNum.nextInt(0,WINB-16), 0));
 			}
 			//stops the boss from spawning 6 enemies every 5 miliseconds
 			Boss.move = "";
@@ -1170,7 +1178,7 @@ public class SpaceGame implements ActionListener {
 					enemyCache.get(enemyCache.size()-1).fireBuffer = 500;
 				}
 				enemySpawn.stop();
-				enemySpawn.setInitialDelay(10000);
+				enemySpawn.setInitialDelay(10500);
 				enemySpawn.restart();
 				
 			}},
@@ -1223,6 +1231,56 @@ public class SpaceGame implements ActionListener {
 				heavensHellSentGift.stop();
 			}}
 			
+		};
+	shootType[] playerWeapons = {
+			new shootType() { public void shoot(int x, int y) {
+					playerstats.firerate = 500;
+					playerShoots.stop();
+					playerShoots.setInitialDelay(playerstats.firerate);
+					playerShoots.restart();
+					Player_lineProjectile projRect = new Player_lineProjectile(0,0);
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y));
+					createSound("player laser shoot.wav");
+				}
+			},
+			new shootType() { public void shoot(int x, int y) {
+					playerstats.firerate = 420;
+					playerShoots.stop();
+					playerShoots.setInitialDelay(playerstats.firerate);
+					playerShoots.restart();
+					Player_lineProjectile projRect = new Player_lineProjectile(0,0);
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2-playerstats.size/2, y));
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2+playerstats.size/2, y));
+					createSound("player laser shoot.wav");
+					createSound("player laser shoot.wav");
+				}
+			},
+			new shootType() { public void shoot(int x, int y) {
+					playerstats.firerate = 1050;
+					playerShoots.stop();
+					playerShoots.setInitialDelay(playerstats.firerate);
+					playerShoots.restart();
+					Player_lineProjectile projRect = new Player_lineProjectile(0,0);
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 45));
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 67));
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 90));
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 113));
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 135));
+					createSound("player laser shoot.wav");
+					createSound("player laser shoot.wav");
+					createSound("player laser shoot.wav");
+				}
+			},
+			new shootType() { public void shoot(int x, int y) {
+					playerstats.firerate = 220;
+					playerShoots.stop();
+					playerShoots.setInitialDelay(playerstats.firerate);
+					playerShoots.restart();
+					Player_lineProjectile projRect = new Player_lineProjectile(0,0);
+					projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y));
+					createSound("player laser shoot.wav");
+				}
+			},
 		};
 		
 	/*
@@ -1291,62 +1349,16 @@ public class SpaceGame implements ActionListener {
 			playerWeapons[weaponState].shoot(x, y);
 		}
 		
-		shootType[] playerWeapons = {
-				new shootType() { public void shoot(int x, int y) {
-						playerstats.firerate = 500;
-						playerShoots.stop();
-						playerShoots.setInitialDelay(playerstats.firerate);
-						playerShoots.restart();
-						Player_lineProjectile projRect = new Player_lineProjectile(0,0);
-						projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y));
-						createSound("player laser shoot.wav");
-					}
-				},
-				new shootType() { public void shoot(int x, int y) {
-						playerstats.firerate = 450;
-						playerShoots.stop();
-						playerShoots.setInitialDelay(playerstats.firerate);
-						playerShoots.restart();
-						Player_lineProjectile projRect = new Player_lineProjectile(0,0);
-						projectileCache.add(new Player_lineProjectile(x-projRect.size/2-playerstats.size/2, y));
-						projectileCache.add(new Player_lineProjectile(x-projRect.size/2+playerstats.size/2, y));
-						createSound("player laser shoot.wav");
-						createSound("player laser shoot.wav");
-					}
-				},
-				new shootType() { public void shoot(int x, int y) {
-						playerstats.firerate = 1050;
-						playerShoots.stop();
-						playerShoots.setInitialDelay(playerstats.firerate);
-						playerShoots.restart();
-						Player_lineProjectile projRect = new Player_lineProjectile(0,0);
-						projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 45));
-						projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 67));
-						projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 90));
-						projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 113));
-						projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y, 135));
-						createSound("player laser shoot.wav");
-						createSound("player laser shoot.wav");
-						createSound("player laser shoot.wav");
-					}
-				},
-				new shootType() { public void shoot(int x, int y) {
-						playerstats.firerate = 220;
-						playerShoots.stop();
-						playerShoots.setInitialDelay(playerstats.firerate);
-						playerShoots.restart();
-						Player_lineProjectile projRect = new Player_lineProjectile(0,0);
-						projectileCache.add(new Player_lineProjectile(x-projRect.size/2, y));
-						createSound("player laser shoot.wav");
-					}
-				},
-			};
+		
 		public void move_Projectiles() {
-			for(Projectile i: projectileCache) {
-				if(i instanceof Player_lineProjectile) {
-					i.y -= i.spd;
+			try {
+				for(Projectile i: projectileCache) {
+					if(i instanceof Player_lineProjectile) {
+						i.x = (int) ((i.spd)*Math.cos(Math.toRadians(i.rotation))+ i.x);
+						i.y = (int) ((i.spd)*Math.sin(Math.toRadians(i.rotation))+ i.y);
+					}
 				}
-			}
+			} catch(ConcurrentModificationException oops) {}
 		}
 		
 		/*
@@ -1380,15 +1392,13 @@ public class SpaceGame implements ActionListener {
 					}
 				}
 				for(int e=0; e<enemyCache.size(); e++) {
-					if(enemyCache.get(e) instanceof Tanker) {
-						Rectangle projRect = new Rectangle(enemyCache.get(e).x, enemyCache.get(e).y, enemyCache.get(e).size, enemyCache.get(e).size);
-						if(player.contains(projRect.x, projRect.y) || player.contains(projRect.x+projRect.width, projRect.y) || player.contains(projRect.x, projRect.y+projRect.height) || player.contains(projRect.x+projRect.width, projRect.y+projRect.height)) {
-							playerstats.hp -= 1;
-							if(playerstats.hp > 1) createSound("damaged sound effect.wav");
-							playerstats.active_iFrames = playerstats.iFrames;
-							player.y += 5; 
-						}	
-					}
+					Rectangle projRect = new Rectangle(enemyCache.get(e).x, enemyCache.get(e).y, enemyCache.get(e).size, enemyCache.get(e).size);
+					if(player.contains(projRect.x, projRect.y) || player.contains(projRect.x+projRect.width, projRect.y) || player.contains(projRect.x, projRect.y+projRect.height) || player.contains(projRect.x+projRect.width, projRect.y+projRect.height)) {
+						playerstats.hp -= 1;
+						if(playerstats.hp > 1) createSound("damaged sound effect.wav");
+						playerstats.active_iFrames = playerstats.iFrames;
+						player.y += 5; 
+					}	
 				}
 			}
 		}
