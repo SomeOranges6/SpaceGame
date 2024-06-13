@@ -1074,14 +1074,17 @@ public class SpaceGame implements ActionListener {
 		
 		//keeps track of when enemies should fire. It is coded so they all don't fire at the same time
 		if(ev.getSource() == enemyShoots && level != 0) {
-			enemyShotAccumulator += ms_sleep;
 			try {
 				for(Enemy e: enemyCache) {
 					if(e instanceof Liner || e instanceof Rotater) {
 						e.untilFire += ms_sleep;
-						if(e.untilFire>e.firerate) e.untilFire=0;
+						if(e.untilFire > e.firerate) {
+							e.untilFire=0;
+							e.fireTrigger = true;
+						}
 						int bufferCheck = e.untilFire % e.firerate;
-						if(bufferCheck == e.fireBuffer) {
+						if(bufferCheck > e.fireBuffer && e.fireTrigger == true) {
+							e.fireTrigger = false;
 							enemyFunctions.shoot(e.x+e.size/2, e.y+e.size/2);
 						}
 					}
@@ -1106,11 +1109,12 @@ public class SpaceGame implements ActionListener {
 				}
 				for(int i=0; i<5; i++) {
 					enemyCache.add(new Liner(75+i*100, -60, 90));
-					enemyCache.get(enemyCache.size()-1).fireBuffer = 500;
+					enemyCache.get(enemyCache.size()-1).fireBuffer = enemyCache.get(enemyCache.size()-1).firerate/2;
 				}
 				enemySpawn.stop();
-				enemySpawn.setInitialDelay(10000);
+				enemySpawn.setInitialDelay(11000);
 				enemySpawn.restart();
+				
 				
 			}},
 			
@@ -1281,12 +1285,14 @@ public class SpaceGame implements ActionListener {
 				},
 			};
 		public void move_Projectiles() {
-			for(Projectile i: projectileCache) {
-				if(i instanceof Player_lineProjectile) {
-					i.x = (int) ((i.spd)*Math.cos(Math.toRadians(i.rotation))+ i.x);
-					i.y = (int) ((i.spd)*Math.sin(Math.toRadians(i.rotation))+ i.y);
+			try {
+				for(Projectile i: projectileCache) {
+					if(i instanceof Player_lineProjectile) {
+						i.x = (int) ((i.spd)*Math.cos(Math.toRadians(i.rotation))+ i.x);
+						i.y = (int) ((i.spd)*Math.sin(Math.toRadians(i.rotation))+ i.y);
+					}
 				}
-			}
+			} catch(ConcurrentModificationException oops) {}
 		}
 		
 		/*
