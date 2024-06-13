@@ -681,19 +681,19 @@ public class SpaceGame implements ActionListener {
 			//drawing stars
 			try {
 				for(Background star : stars) {
-					game.setColor(new Color(star.R, star.G, star.B, 5));
+					game.setColor(new Color(star.R, star.G, star.B, 8));
 					game.drawPolygon(fourPointStar(star.x,star.y, 2));
 				
-					game.setColor(new Color(star.R - 10, star.G - 10, star.B - 10, 10));
+					game.setColor(new Color(star.R - 10, star.G - 10, star.B - 10, 15));
 					game.drawPolygon(fourPointStar(star.x, star.y, 1));
 				}
 			} catch(ConcurrentModificationException oops) {
 				backupStars = stars;
 				for(Background star : backupStars) {
-					game.setColor(new Color(star.R, star.G, star.B, 5));
+					game.setColor(new Color(star.R, star.G, star.B, 8));
 					game.drawPolygon(fourPointStar(star.x,star.y, 2));
 				
-					game.setColor(new Color(star.R - 10, star.G - 10, star.B - 10, 10));
+					game.setColor(new Color(star.R - 10, star.G - 10, star.B - 10, 15));
 					game.drawPolygon(fourPointStar(star.x, star.y, 1));
 				}
 			}
@@ -1064,10 +1064,10 @@ public class SpaceGame implements ActionListener {
 		//infinite enemies spawn based on a timer
 		if(ev.getSource() == enemySpawn && level != 0) {
 			waveAccumulator++;
-			if(waveAccumulator==3) currentWave++;
-			if(waveAccumulator==7) currentWave++;
-			if(waveAccumulator==15) currentWave++;
-			if(waveAccumulator==30) currentWave++;
+			if(waveAccumulator==5) currentWave++;
+			if(waveAccumulator==11) currentWave++;
+			if(waveAccumulator==20) currentWave++;
+			if(waveAccumulator==40) currentWave++;
 			easyWaves[currentWave].wave();
 			
 	}
@@ -1123,7 +1123,7 @@ public class SpaceGame implements ActionListener {
 					enemyCache.add(new Tanker(i*100, 0));
 				}
 				enemySpawn.stop();
-				enemySpawn.setInitialDelay(8000);
+				enemySpawn.setInitialDelay(6000);
 				enemySpawn.restart();
 			}},
 			
@@ -1134,7 +1134,7 @@ public class SpaceGame implements ActionListener {
 	            enemyCache.add(new Rotater(randomPointX, -50, 50, 180));
 	            enemyCache.add(new Rotater(randomPointX, -50, 50, 270));
 	            enemySpawn.stop();
-				enemySpawn.setInitialDelay(5000);
+				enemySpawn.setInitialDelay(3000);
 				enemySpawn.restart();
 			}},
 			
@@ -1153,7 +1153,7 @@ public class SpaceGame implements ActionListener {
 	                if (chance<3)enemyCache.get(enemyCache.size()-1).rotation = 90;
 	            }
 	            enemySpawn.stop();
-				enemySpawn.setInitialDelay(5000);
+				enemySpawn.setInitialDelay(2000);
 				enemySpawn.restart();
 			}},
 			
@@ -1437,7 +1437,7 @@ public class SpaceGame implements ActionListener {
 			for(int e = 0; e<enemyCache.size(); e++) {
 				if(enemyCache.get(e).hp <= 0) {
 					//basically repalces the enemy with a powerup when it dies
-					powerCache.add(new Powerups(enemyCache.get(e).x, enemyCache.get(e).y));
+					if(randNum.nextInt(1,3+1)==1) powerCache.add(new Powerups(enemyCache.get(e).x, enemyCache.get(e).y));
 					enemyCache.remove(e);
 					createSound("kill noise.wav");
 					kills++;
@@ -1479,8 +1479,8 @@ public class SpaceGame implements ActionListener {
 			}
 		} catch(ConcurrentModificationException oops) {}
 		
-		for(int i=0; i<stars.size(); i++) {
-			if(stars.get(i).y > WINH) stars.remove(i);
-		}	
-}
+		if(stars.size()>0) {
+			if(stars.get(0).y > WINH) stars.remove(0);
+		}
+	}
 }
