@@ -3,7 +3,7 @@ package spaceGame;
 @SuppressWarnings("serial")
 abstract class Boss extends GameEntities {
 	public int hp, iFrames, Loop;
-	public int attackrate; //If we get time, replace firerate for methods that do custom attacks
+	public int attackrate, summonAmount; //If we get time, replace firerate for methods that do custom attacks
 	public String bossTitle, move;
 	public int rotation; //allows boss to move side to side
 }
@@ -18,6 +18,7 @@ class Boss1 extends Boss {
 		this.iFrames=0;
 		this.size=200;
 		this.attackrate = 10000;
+		this.summonAmount = 6;
 		this.x=200;
 		this.y=25;
 		this.spd = 3;
