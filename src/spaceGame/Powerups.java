@@ -13,12 +13,13 @@ public class Powerups extends Rectangle {
 		this.x = x;
 		this.y = y;
 		this.intersect = false;
-		switch(rand.nextInt(0, 6+1)) {
-		case 0:
+		switch(rand.nextInt(1, 8+1)) {
+		case 1:
 			this.type = "HP";
 			this.diameter = 10;
 			break;
-		case 1:
+		case 2:
+		case 3:
 			this.type = "DAMAGE";
 			this.diameter = 5;
 			break;
