@@ -1320,15 +1320,13 @@ public class SpaceGame implements ActionListener {
 					}
 				}
 				for(int e=0; e<enemyCache.size(); e++) {
-					if(enemyCache.get(e) instanceof Tanker) {
-						Rectangle projRect = new Rectangle(enemyCache.get(e).x, enemyCache.get(e).y, enemyCache.get(e).size, enemyCache.get(e).size);
-						if(player.contains(projRect.x, projRect.y) || player.contains(projRect.x+projRect.width, projRect.y) || player.contains(projRect.x, projRect.y+projRect.height) || player.contains(projRect.x+projRect.width, projRect.y+projRect.height)) {
-							playerstats.hp -= 1;
-							if(playerstats.hp > 1) createSound("damaged sound effect.wav");
-							playerstats.active_iFrames = playerstats.iFrames;
-							player.y += 5; 
-						}	
-					}
+					Rectangle projRect = new Rectangle(enemyCache.get(e).x, enemyCache.get(e).y, enemyCache.get(e).size, enemyCache.get(e).size);
+					if(player.contains(projRect.x, projRect.y) || player.contains(projRect.x+projRect.width, projRect.y) || player.contains(projRect.x, projRect.y+projRect.height) || player.contains(projRect.x+projRect.width, projRect.y+projRect.height)) {
+						playerstats.hp -= 1;
+						if(playerstats.hp > 1) createSound("damaged sound effect.wav");
+						playerstats.active_iFrames = playerstats.iFrames;
+						player.y += 5; 
+					}	
 				}
 			}
 		}
