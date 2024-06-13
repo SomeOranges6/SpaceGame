@@ -9,25 +9,22 @@ public class Powerups extends Rectangle {
 	boolean intersect;
 	
 	Random rand = new Random();
-	
-	//generates a random powerup
 	Powerups(int x, int y) {
 		this.x = x;
 		this.y = y;
 		this.intersect = false;
-		switch(rand.nextInt(0, 6+1)) {
+		switch(rand.nextInt(0, 8+1)) {
 		case 0:
-			//this gives player hp
+		case 1:
 			this.type = "HP";
 			this.diameter = 10;
 			break;
-		case 1:
-			//more damage
+		case 2:
+		case 3:
 			this.type = "DAMAGE";
 			this.diameter = 5;
 			break;
 		default:
-			//and double
 			this.type = "DOUBLE";
 			this.diameter = 7;
 			break;
