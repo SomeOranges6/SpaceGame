@@ -18,7 +18,7 @@ class Boss1 extends Boss {
 		this.iFrames=0;
 		this.size=200;
 		this.attackrate = 10000;
-		this.summonAmount = 6;
+		this.summonAmount = 4;
 		this.x=200;
 		this.y=25;
 		this.spd = 3;
@@ -26,3 +26,4 @@ class Boss1 extends Boss {
 		
 	}
 }
+
