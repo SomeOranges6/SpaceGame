@@ -8,14 +8,17 @@ import main.ProjectileRegistry;
 import main.SpaceGame;
 
 @SuppressWarnings("serial")
+/**The player class, handles input and making projectiles**/
 public class Player extends EntityBase {
 	
+	//Unimplemented variables for a boost button
 	int boostedSpeed, fuel;
 	
 	public int iFrames;
 	
 	public boolean boostCooldown;
 	
+	/**How quickly can the player fires projectiles**/
 	public int firerate = 50;
 	
 	public Player(int x, int y, int width, int height, SpaceGame game) {
@@ -23,6 +26,7 @@ public class Player extends EntityBase {
 		maxSpeed = 3;
 	}
 	
+	/**Prevents the player from dying (for testing)**/
 	public void onDead() {
     	health = 10;
     }
@@ -37,7 +41,8 @@ public class Player extends EntityBase {
     	gc.setColor(new Color(255,255,0));
     	GeneralUtil.rectFromRectangle(this, gc);
     }
-    
+	
+    /**Spawns the player projectiles**/
     public void makeAttack() {
     	if(game.ticks % firerate == 0 && gc.getMouseClick() > 0) {
            game.spawnEntity(ProjectileRegistry.getPlayerProjectile(x, y - 20, 5, 5, game));
@@ -50,7 +55,7 @@ public class Player extends EntityBase {
     	handleInput();
     	super.move();
     }
-    
+    /**Normalization code, not made by me, credit to Rajdeep**/
     public void handleInput() {
     	int normalization = 0;
 		if(gc.isKeyDown(KeyEvent.VK_W) || gc.isKeyDown(KeyEvent.VK_UP)) {

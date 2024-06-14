@@ -5,7 +5,9 @@ import java.awt.Color;
 import main.GeneralUtil;
 import main.SpaceGame;
 
+
 @SuppressWarnings("serial")
+/**Base projectile class**/
 public class ProjectileBase extends EntityBase {
 	
 	/** Solely used for enemies**/
@@ -17,7 +19,8 @@ public class ProjectileBase extends EntityBase {
 	public static int getDamage() {
 		return 1;
 	}
-
+	
+	/**Either aims at the player (for enemies) or goes upward (for players or non aiming projectiles)**/
 	@Override
     public void update() {
 		if(aiming) {
@@ -30,13 +33,15 @@ public class ProjectileBase extends EntityBase {
 		}
 		super.update();
     }
-
+	
+	/**Used for enemies to aim at the player**/
 	@Override
     public void onCollision(EntityBase e) {
     	e.health -= getDamage();
     	onDead();
     }
 	
+	/**Used for enemies to aim at the player**/
 	public double findRotation(int x1, int y1, int x2, int y2) {
 		return Math.toDegrees(Math.atan2(y2-y1, x2-x1));
 	}
